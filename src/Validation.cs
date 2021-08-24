@@ -2,119 +2,38 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace Asypi {
-    public static class Validation {
+    /// <summary>A utility class for validating things.</summary>
+    static class Validation {
         const string PATH_REGEX_EXPRESSION = "(?<=:.*:.*/).*";
+        /// <summary>Grabs the requested resource path from a URL, if possible.</summary>
         public static Regex PathRegex { get; private set; }
         
-        static HashSet<char> VALID_LOWERCASE_HOSTNAME_CHARS = new HashSet<char>() { 
-            'a',
-            'b',
-            'c',
-            'd',
-            'e',
-            'f',
-            'g',
-            'h',
-            'i',
-            'j',
-            'k',
-            'l',
-            'm',
-            'n',
-            'o',
-            'p',
-            'q',
-            'r',
-            's',
-            't',
-            'u',
-            'v',
-            'w',
-            'x',
-            'y',
-            'z',
-            '0',
-            '1',
-            '2',
-            '3',
-            '4',
-            '5',
-            '6',
-            '7',
-            '8',
-            '9',
-            '-',
-            '_',
-            '.',
-            '*'
-        };
+        const string FILE_EXTENSION_REGEX = "\\.[0-9a-z]+$";
+        /// <summary>Grabs a file extension from a path, if one exists.</summary>
+        public static Regex FileExtensionRegex { get; private set; }
         
-        static HashSet<char> VALID_LOWERCASE_SUBPATH_CHARS = new HashSet<char>() { 
-            'a',
-            'b',
-            'c',
-            'd',
-            'e',
-            'f',
-            'g',
-            'h',
-            'i',
-            'j',
-            'k',
-            'l',
-            'm',
-            'n',
-            'o',
-            'p',
-            'q',
-            'r',
-            's',
-            't',
-            'u',
-            'v',
-            'w',
-            'x',
-            'y',
-            'z',
-            '0',
-            '1',
-            '2',
-            '3',
-            '4',
-            '5',
-            '6',
-            '7',
-            '8',
-            '9',
-            '-',
-            '_',
-            '{',
-            '}'
-        };
+        const string HOSTNAME_REGEX = "^[a-zA-Z0-9-_.*]*$";
+        public static Regex HostnameRegex { get; private set; }
+        
+        const string SUBPATH_REGEX = "^[a-zA-Z0-9-_{}]*$";
+        public static Regex SubPathRegex { get; private set; }
         
         
         static Validation() {
             PathRegex = new Regex(PATH_REGEX_EXPRESSION, RegexOptions.Compiled);
+            FileExtensionRegex = new Regex(FILE_EXTENSION_REGEX, RegexOptions.Compiled);
+            HostnameRegex = new Regex(HOSTNAME_REGEX, RegexOptions.Compiled);
+            SubPathRegex = new Regex(SUBPATH_REGEX, RegexOptions.Compiled);
         }
         
-        static bool ValidateAgainstWhitelist(string str, HashSet<char> whitelist) {
-            string strLower = str.ToLower();
-            
-            foreach (char c in strLower.ToCharArray()) {
-                if (!whitelist.Contains(c)) {
-                    return false;
-                }
-            }
-            
-            return true;
-        }
-        
+        /// <summary>Returns true if the given string is a valid hostname, and false otherwise.</summary>
         public static bool IsHostnameValid(string hostname) {
-            return ValidateAgainstWhitelist(hostname, VALID_LOWERCASE_HOSTNAME_CHARS);
+            return HostnameRegex.Match(hostname).Success;
         }
         
+        /// <summary>Returns true if the given string is a valid subpath, and false otherwise.</summary>
         public static bool IsSubPathValid(string subpath) {
-            return ValidateAgainstWhitelist(subpath, VALID_LOWERCASE_SUBPATH_CHARS);
+            return SubPathRegex.Match(subpath).Success;
         }
     }
 }

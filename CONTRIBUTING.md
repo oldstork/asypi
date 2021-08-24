@@ -1,8 +1,8 @@
 # Contributing
 
-Asypi is currently set up under a BDFL system, with @therealstork at the helm. So long as you roughly follow the following rules, any PRs you submit should be merged without issue:
+Asypi is currently set up under a BDFL system, with @therealstork at the helm. So long as you follow the following guidelines, any PRs you submit should be merged without issue:
 
-NOTE: If you think any of the following are unreasonable, please open an issue on GitHub. Everything here is subject to change in light of new developments and/or reasoning.
+NOTE: If you think any of the following guidelines are unreasonable, please open an issue on GitHub. Everything here is subject to change in light of new developments and/or reasoning.
 
 ## Formatting
 
@@ -13,7 +13,7 @@ NOTE: If you think any of the following are unreasonable, please open an issue o
 The user-facing API should be as simple as possible while hiding as little as possible. For example, with the following function:
 
 ```C#
-server.AddRoute(
+server.Route(
     HttpMethod.Get,
     "/",
     () => { return "Hello World!" },
@@ -28,4 +28,10 @@ This is the desired type of API design. Avoid hiding things behind things like c
 
 ## Code Quality and Comments
 
-The codebase as-is doesn't do a great job with comments, so the bar isn't very high for contributors. Unless if its truly difficult to understand what code does by reading it, feel free to call it self-documenting. As the project progresses, the expected quality of comments will hopefully increase.
+Try to maintain the current quality and frequency of comments. Code that is difficult to understand even with comments should be rewritten unless doing so would result in significant performance regressions.
+
+## Git
+
+One commit per thing, and one thing per commit (consider a thing to be any reasonably significant and distinct item; e.g. a feature, bugfix, or enhancement). This ensures that the commit history is easily understandable, and one knows exactly what features they are including/excluding when performing `git checkout`.
+
+Please use `git pull --rebase` to avoid ugly merge commits.

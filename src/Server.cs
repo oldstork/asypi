@@ -1,14 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using Serilog;
 
 namespace Asypi {
     
+    /// <summary>Represents the minimum log level at which the logger will forward a log to its sinks. Corresponds directly to Serilog log levels.</summary>
     public enum LogLevel {
         Debug,
         Information,
@@ -17,31 +18,57 @@ namespace Asypi {
         Fatal
     }
     
+    /// <summary>Provides a simple, configurable, and scalable HTTP server.</summary>
     public class Server {
+        /// <summary>The port that the <see cref="Server"/> will bind to when <see cref="Server.Run()"/> or <see cref="Server.RunAsync()"/> is called.</summary>
         public int Port { get; private set; }
-        public IEnumerable Hosts { get; private set; }
-        public int WorkerCount { get; private set; }
-        public LogLevel LogLevel { get; private set; }
-        Responder responder404 = ResponderUtils.Respond404;
         
+        /// <summary>The hosts that the <see cref="Server"/> will bind to when <see cref="Server.Run()"/> or <see cref="Server.RunAsync()"/> is called.</summary>
+        public IEnumerable Hosts { get; private set; }
+        
+        /// <summary>The number of workers that the <see cref="Server"/> will create when <see cref="Server.Run()"/> or <see cref="Server.RunAsync()"/> is called.</summary>
+        public int WorkerCount { get; private set; }
+        
+        /// <summary>The <c>LogLevel</c> that the <see cref="Server"/> initialized the logger with.</summary>
+        public LogLevel LogLevel { get; private set; }
+        
+        /// <summary>The <c>Responder</c> that the <see cref="Server"/> will route requests to when no other valid routes were found.</summary>
+        public Responder Responder404 { get; private set; }
+        
+        /// <summary>The internal router of the <see cref="Server"/>.</summary>
         Router router;
         
         
-        public Server() {
-            Init(8000, new string[]{ "localhost" }, 512, LogLevel.Debug);
+        /// <summary>Creates a new <see cref="Server"/> with the provided parameters.</summary>
+        public Server(
+            int port = 8000,
+            string hostname = "localhost",
+            int workerCount = 512,
+            LogLevel logLevel = LogLevel.Debug
+        ) {
+            Init(port, new string[]{ hostname }, workerCount, logLevel);
         }
         
-        public Server(int port, string hostname) {
-            Init(port, new string[]{ hostname }, 512, LogLevel.Debug);
+        /// <summary>Creates a new <see cref="Server"/> with the provided parameters.</summary>
+        public Server(
+            int port,
+            string[] hostnames,
+            int workerCount = 512,
+            LogLevel logLevel = LogLevel.Debug
+        ) {
+            Init(port, hostnames, workerCount, logLevel);
         }
         
         
+        /// <summary>Internal initializer of the <see cref="Server"/>. Allows multiple user-facing constructors without reusing code.</summary>
         void Init(int port, IEnumerable hosts, int workerCount, LogLevel logLevel) {
+            // Set server configuration variables
             Port = port;
             Hosts = hosts;
             WorkerCount = workerCount;
             LogLevel = logLevel;
             
+            // Initialize logger
             LoggerConfiguration logConfig = new LoggerConfiguration();
             
             switch (LogLevel) {
@@ -64,41 +91,175 @@ namespace Asypi {
             
             Serilog.Log.Logger = logConfig.WriteTo.Console().CreateLogger();
             
+            // Initialize router
+            // This has to come after logger initialization because router initialization outputs some logs
+            Responder404 = ResponderUtils.Respond404;
             router = new Router();
         }
         
-        public void AddRoute(HttpMethod method, string path, Responder responder) {
-            router.AddRoute(method, path, responder);
+        /// <summary>
+        /// <br />
+        /// Paths should not contain trailing slashes.
+        /// <br />
+        /// Paths can include variable parameters, the values of which will be forwarded to the responder.
+        /// Variable parameters must be surrounded by curly braces.
+        /// For example, <c>/users/{id}</c> would match <c>/users/1</c>, <c>/users/joe</c>, etc.,
+        /// and the responder would receive argument lists <c>["1"]</c> and <c>["joe"]</c> respectively.
+        /// </summary>
+        void PathsDoc() {}
+        
+        /// <summary>
+        /// Routes requests to <c>path</c> of method <c>method</c> to <c>responder</c>.
+        /// <inheritdoc cref="Server.PathsDoc" />
+        /// </summary>
+        public void Route(HttpMethod method, string path, Responder responder) {
+            router.Route(method, path, responder);
         }
         
-        public void AddRoute(HttpMethod method, string path, SimpleTextResponder responder, string contentType) {
-            router.AddRoute(method, path, responder, contentType);
+        /// <summary>
+        /// Routes requests to <c>path</c> of method <c>method</c> to a simple responder that sets
+        /// the body of the response to the output of the provided function, and the content type
+        /// to <c>contentType</c>.
+        /// <inheritdoc cref="Server.PathsDoc" />
+        /// </summary>
+        void TransformedResponderRouteDoc() {}
+        
+        /// <inheritdoc cref="Server.TransformedResponderRouteDoc" />
+        public void Route(HttpMethod method, string path, SimpleTextResponder responder, string contentType) {
+            router.Route(method, path, responder, contentType);
         }
         
-        public void AddRoute(HttpMethod method, string path, SimpleTextResponderArgs responder, string contentType) {
-            router.AddRoute(method, path, responder, contentType);
+        /// <inheritdoc cref="Server.TransformedResponderRouteDoc" />
+        public void Route(HttpMethod method, string path, SimpleTextResponderArgs responder, string contentType) {
+            router.Route(method, path, responder, contentType);
         }
         
-        public void AddRoute(HttpMethod method, string path, ComplexTextResponder responder, string contentType) {
-            router.AddRoute(method, path, responder, contentType);
+        /// <inheritdoc cref="Server.TransformedResponderRouteDoc" />
+        public void Route(HttpMethod method, string path, ComplexTextResponder responder, string contentType) {
+            router.Route(method, path, responder, contentType);
         }
         
+        
+        /// <summary>Note that <see cref="DefaultHeaders"/> contains <c>X-Content-Type-Options: nosniff</c>.</summary>
+        void DefaultHeadersNoteDoc() {}
+        
+        /// <summary>
+        /// Routes requests to <c>path</c> to the file at <c>filePath</c>.
+        /// The response will have its content type set to <c>contentType</c> if provided.
+        /// Otherwise, the content type will be guessed.
+        /// <br />
+        /// <inheritdoc cref="Server.DefaultHeadersNoteDoc" />
+        /// </summary>
+        public void RouteStaticFile(string path, string filePath, string contentType = null) {
+            router.Route(HttpMethod.Get, path, (HttpRequest req, HttpResponse res, List<string> args) => {
+                byte[] bytes = FileServer.Get(filePath);
+                
+                res.ContentType = MimeGuesser.GuessTypeByExtension(filePath);
+                
+                res.LoadHeaders(DefaultHeadersInstance.Instance);
+                
+                res.BodyBytes = bytes;
+            });
+        }
+        
+        /// <summary>
+        /// Routes requests to paths under <c>mountRoot</c> to files under <c>dirRoot</c>.
+        /// Content types will be guessed.
+        /// <br />
+        /// If <c>maxDepth</c> is not set, will recursively include all subdirectories of <c>dirRoot</c>.
+        /// Otherwise, will only include subdirectories to a depth of <c>maxDepth</c>.
+        /// For example, with <c>maxDepth</c> set to <c>1</c>, will only include files directly under <c>dirRoot</c>.
+        /// <br />
+        /// <inheritdoc cref="Server.DefaultHeadersNoteDoc" />
+        /// <br />
+        /// If finer control is necessary, consider mounting individual files using <c>Server.RouteStaticFile()</c>.
+        /// </summary>
+        public void RouteStaticDir(string mountRoot, string dirRoot, int? maxDepth = null) {
+            // It's possible to have a trailing slash if the provided mountRoot is /
+            string eMountRoot = mountRoot[mountRoot.Length - 1] == '/' ? mountRoot.Substring(0, mountRoot.Length - 1) : mountRoot;
+            
+            // grab file paths in dirRoot
+            string[] files = new string[]{};
+            
+            try {
+                files = Directory.GetFiles(dirRoot);
+            } catch (DirectoryNotFoundException) {
+                Log.Error("[Asypi] Server.RouteStaticDir() Directory not found: {0}", dirRoot);
+                return;
+            }
+            
+            // for every file in dirRoot
+            foreach (string filePath in files) {
+                // get the filename only and mount it
+                // this works because when we recursively call RouteStaticDir(),
+                // we also change mountRoot
+                string[] filePathSplit = Utils.SplitFilePath(filePath);
+                
+                string mountPath = String.Format("{0}/{1}", eMountRoot, filePathSplit[filePathSplit.Length - 1]);
+                
+                RouteStaticFile(mountPath, filePath);
+            }
+            
+            
+            // If we should also search directories under dirRoot
+            if (maxDepth == null || maxDepth > 1) {
+                // grab directory paths in dirRoot
+                string[] dirs = new string[]{};
+                
+                try {
+                    dirs = Directory.GetDirectories(dirRoot);
+                } catch (DirectoryNotFoundException) {
+                    // This theoretically should not happen, because the earlier one should fire first and return
+                    // However it's still here for safety
+                    Log.Error("[Asypi] Server.RouteStaticDir() Directory not found: {0}", dirRoot);
+                    return;
+                }
+                
+                // for every directory in dirRoot
+                foreach (string dirPath in dirs) {
+                    // get only the directory name
+                    string[] dirPathSplit = Utils.SplitFilePath(dirPath);
+                    
+                    // mount files under the directory
+                    RouteStaticDir(
+                        String.Format("{0}/{1}", eMountRoot, dirPathSplit[dirPathSplit.Length - 1]),
+                        dirPath,
+                        maxDepth == null ? null : maxDepth - 1
+                    );
+                }
+            }
+        }
+        
+        /// <summary>Sets <see cref="Server.Responder404"/> to the provided <see cref="Responder"/>.</summary>
         public void Set404Responder(Responder responder) {
-            responder404 = responder;
+            Responder404 = responder;
         }
         
+        /// <summary>
+        /// Sets <see cref="Server.Responder404"/> to a simple responder that sets
+        /// the body of the response to the output of the provided function, and the content type
+        /// to <c>contentType</c>.
+        /// </summary>
         public void Set404Responder(SimpleTextResponder responder, string contentType) {
-            responder404 = ResponderUtils.Transform(responder, contentType);
+            Responder404 = ResponderUtils.Transform(responder, contentType);
         }
         
+        /// <summary>
+        /// Sets <see cref="Server.Responder404"/> to a simple responder that sets
+        /// the body of the response to the output of the provided function, and the content type
+        /// to <c>contentType</c>.
+        /// </summary>
         public void Set404Responder(ComplexTextResponder responder, string contentType) {
-            responder404 = ResponderUtils.Transform(responder, contentType);
+            Responder404 = ResponderUtils.Transform(responder, contentType);
         }
         
+        /// <summary>Runs the server. For a sync wrapper, consider <see cref="Server.Run()"/>.</summary>
         public Task RunAsync() {
             return Task.Run(() => {
+                // initialize HttpListener
                 HttpListener listener = new HttpListener();
                 
+                // generate HttpListener prefixes from provided hostnames and port
                 foreach (string host in Hosts) {
                     if (Validation.IsHostnameValid(host)) {
                         string prefix = String.Format("http://{0}:{1}/", host, Port);
@@ -116,62 +277,22 @@ namespace Asypi {
                 
                 listener.Start();
                 
+                // create workers
                 for (int i = 0; i < WorkerCount; i++) {
-                    Task.Run(async () => {
-                        while (true) {
-                            HttpListenerContext context = await listener.GetContextAsync();
-                            
-                            HttpListenerRequest httpRequest = context.Request;
-                            HttpListenerResponse httpResponse = context.Response;
-                            
-                            HttpRequest req = new HttpRequest(httpRequest);
-                            HttpResponse res = new HttpResponse(httpResponse);
-                            
-                            var match = Validation.PathRegex.Match(httpRequest.Url.ToString());
-                            
-                            string requestPath = "Could not parse";
-                            
-                            if (match.Success) {
-                                requestPath = String.Format("/{0}", match.ToString());
-                                
-                                if (requestPath.Length > 1 && requestPath[requestPath.Length - 1] == '/') {
-                                    requestPath = requestPath.Substring(0, requestPath.Length - 1);
-                                }
-                                
-                                bool foundRoute = router.Route(
-                                    httpRequest.HttpMethod.ToHttpMethod().Value,
-                                    requestPath,
-                                    req,
-                                    res
-                                );
-                                
-                                if (!foundRoute) {
-                                    responder404(req, res, new List<string>());
-                                }
-                                
-                            }
-                            
-                            httpResponse.OutputStream.Close();
-                            
-                            Log.Debug(
-                                "[Asypi] {0} {1}: {2} => {3} {4}",
-                                httpRequest.RemoteEndPoint,
-                                httpRequest.HttpMethod,
-                                httpRequest.Url,
-                                requestPath,
-                                res.StatusCode
-                            );
-                        }
-                    });
+                    Worker worker = new Worker(this, router);
+                    
+                    worker.Run(listener);
                 }
                 
                 while (true) {
                     // let workers work
+                    // an infinite loop is required here because otherwise the main thread would complete,
+                    // killing all the workers
                 }
             });
         }
         
-        /// <summary>Runs the server. This will block the main thread until the server stops running. For async, consider <c>Server.RunAsync().</c></summary>
+        /// <summary>Runs the server. This will block the thread until the server stops running. For async, consider <see cref="Server.RunAsync()"/>.</summary>
         public void Run() {
             RunAsync().Wait();
         }

@@ -9,7 +9,7 @@ using Asypi;
 
 Server server = new Server(8000, "localhost");
 
-server.AddRoute(
+server.Route(
     HttpMethod.Get,
     "/",
     () => { return "Hello World!"; },
@@ -19,6 +19,13 @@ server.AddRoute(
 server.Run();
 
 ```
+
+## Features
+
+- Simple declarative API
+- Async support
+- Flexible router supporting variable parameters
+- Cached static file server supporting custom mount points
 
 ## Use Cases
 
@@ -44,4 +51,4 @@ If you like this project and want to contribute, please come and do so! More inf
 
 ## Documentation
 
-Asypi is currently in the very early stages of development, and as a result has no documentation. Use at your own risk.
+Asypi is currently in the very early stages of development, and as a result has no proper documentation. Use at your own risk.
