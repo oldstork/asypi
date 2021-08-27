@@ -1,6 +1,10 @@
 # Asypi
 
+[![Documentation Status](https://readthedocs.org/projects/asypi/badge/?version=latest)](https://asypi.readthedocs.io/en/latest/?badge=latest)
+
 A simple, asynchronous, and scalable HTTP server built on `System.Net.HttpListener`. Pronounced "AS-eh-PIE."
+
+[Docs](https://asypi.readthedocs.io/en/latest/)
 
 ## Hello World Example
 
@@ -43,7 +47,7 @@ server.Run();
 - Suitable for production usage unless if you *really* know what you're doing.
 - Good for complex projects. For complex needs, consider alternatives such as ASP.NET.
 
-Hopefully, as the project progresses, the first 3 of these caveats can be removed.
+Hopefully, as the project progresses, the these caveats can be removed.
 
 ## Contributing
 
@@ -51,4 +55,4 @@ If you like this project and want to contribute, please come and do so! More inf
 
 ## Documentation
 
-Asypi is currently in the very early stages of development, and as a result has no proper documentation. Use at your own risk.
+Documentation for Asypi can be found on [readthedocs.io](https://asypi.readthedocs.io/en/latest/).

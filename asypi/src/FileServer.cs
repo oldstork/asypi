@@ -9,15 +9,14 @@ namespace Asypi {
     public static class FileServer {
         // LRU cache
         static Dictionary<string, byte[]> contentByFile = new Dictionary<string, byte[]>();
-        static List<string> recency = new List<string>();
+        static string[] recency;
         static int start = 0;
-        static int end = Params.FILESERVER_LRU_CACHE_SIZE - 1;
+        static int end;
         
-        static FileServer() {
-            // initialize recency
-            for (int i = 0; i < Params.FILESERVER_LRU_CACHE_SIZE; i++) {
-                recency.Add(null);
-            }
+        
+        public static void Init() {
+            recency = new string[Params.FILESERVER_LRU_CACHE_SIZE];
+            end = Params.FILESERVER_LRU_CACHE_SIZE - 1;
         }
         
         static void AdvanceLRUIndices() {
@@ -79,7 +78,7 @@ namespace Asypi {
         
         /// <summary>
         /// Get the contents of a file. 
-        /// Returns an empty string if file not found. LRU-cached.
+        /// Returns null if file not found. LRU-cached.
         /// </summary>
         public static byte[] Get(string filePath) {
             if (!contentByFile.ContainsKey(filePath)) {
@@ -88,7 +87,7 @@ namespace Asypi {
                     Cache(filePath, File.ReadAllBytes(filePath));
                 } catch (FileNotFoundException) {
                     Log.Error("[Asypi] FileServer.Get() File not found: {0}", filePath);
-                    return new byte[]{};
+                    return null;
                 }
             } else {
                 // if we did find file in cache, re-cache it to reset LRU recency

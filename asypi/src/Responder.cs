@@ -22,10 +22,10 @@ namespace Asypi {
     public delegate string SimpleTextResponder();
     
     /// <inheritdoc cref="TransformedResponderDoc"/>
-    public delegate string ComplexTextResponder(HttpRequest request, HttpResponse response);
+    public delegate string SimpleTextResponderArgs(List<string> args);
     
     /// <inheritdoc cref="TransformedResponderDoc"/>
-    public delegate string SimpleTextResponderArgs(List<string> args);
+    public delegate string ComplexTextResponder(HttpRequest request, HttpResponse response);
     
     /// <summary>A set of utilities for working with and transforming things into <see cref="Responder"/>s.</summary>
     static class ResponderUtils {
@@ -38,27 +38,30 @@ namespace Asypi {
             HttpResponse res,
             string responseText,
             string contentType,
-            Headers headers
+            IHeaders headers
         ) {
             res.ContentType = contentType;
             
-            Headers ehd = headers;
+            IHeaders ehd = headers;
             
             if (headers == null) ehd = DefaultHeadersInstance.Instance;
             
             res.LoadHeaders(ehd);
             
-            res.Body = responseText;
+            res.BodyText = responseText;
         }
         
-        /// <summary>Transforms the provided pseudo-responder into a proper <see cref="Responder"/>.</summary>
+        /// <summary>
+        /// Transforms the provided pseudo-responder into a proper <see cref="Responder"/>.
+        /// If headers is null, will use default headers.
+        /// </summary>
         static void ResponderTransformerDoc() {}
         
         /// <inheritdoc cref="ResponderTransformerDoc"/>
         public static Responder Transform(
             SimpleTextResponder simpleTextResponder,
             string contentType,
-            Headers headers = null
+            IHeaders headers
         ) {
             return (HttpRequest req, HttpResponse res, List<string> args) => {
                 string responseText = simpleTextResponder();
@@ -71,7 +74,7 @@ namespace Asypi {
         public static Responder Transform(
             SimpleTextResponderArgs simpleTextResponderArgs,
             string contentType,
-            Headers headers = null
+            IHeaders headers
         ) {
             return (HttpRequest req, HttpResponse res, List<string> args) => {
                 string responseText = simpleTextResponderArgs(args);
@@ -84,7 +87,7 @@ namespace Asypi {
         public static Responder Transform(
             ComplexTextResponder complexTextResponder,
             string contentType,
-            Headers headers = null
+            IHeaders headers
         ) {
             return (HttpRequest req, HttpResponse res, List<string> args) => {
                 string responseText = complexTextResponder(req, res);
@@ -97,7 +100,7 @@ namespace Asypi {
         /// <summary>The inner responder of <see cref="Respond404"/></summary>
         static Responder Respond404Text = Transform(() => {
             return "<!DOCTYPE html><html><body><h1>Error 404</h1><p>Resource not found</p></body></html>";
-        }, "text/html");
+        }, "text/html", null);
         
         /// <summary>A sensible default 404 <see cref="Responder"/>.</summary>
         public static void Respond404(HttpRequest req, HttpResponse res, List<string> args) {

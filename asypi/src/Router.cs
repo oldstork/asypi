@@ -119,7 +119,29 @@ namespace Asypi {
             }
         }
         
-        /// <summary>Create a new route with the given parameters.</summary>
+        /// <summary>Resets all routes</summary>
+        public void Reset() {
+            Log.Warning("[Asypi] Resetting router");
+            
+            foreach (Dictionary<int, List<Route>> routeLengths in routes.Values) {
+                foreach (List<Route> routeList in routeLengths.Values) {
+                    routeList.Clear();
+                }
+            }
+            
+            foreach (Dictionary<string, Route> routeLookup in nonParameterizedRoutes.Values) {
+                routeLookup.Clear();
+            }
+        }
+        
+        /// <summary>
+        /// Create a new route with the given parameters.
+        /// If headers is null, will use default headers.
+        /// </summary>
+        void RouteDoc() {}
+        
+        
+        /// <inheritdoc cref="RouteDoc" />
         public void Route(HttpMethod method, string path, Responder responder) {
             Route route = new Route(method, path, responder);
             routes[method][route.Length].Add(route);
@@ -131,19 +153,37 @@ namespace Asypi {
             Log.Debug("[Asypi] Registered route {0} {1}", method.AsString(), path);
         }
         
-        /// <summary>Create a new route with the given parameters.</summary>
-        public void Route(HttpMethod method, string path, SimpleTextResponder responder, string contentType) {
-            Route(method, path, ResponderUtils.Transform(responder, contentType));
+        /// <inheritdoc cref="RouteDoc" />
+        public void Route(
+            HttpMethod method,
+            string path,
+            SimpleTextResponder responder,
+            string contentType,
+            IHeaders headers
+        ) {
+            Route(method, path, ResponderUtils.Transform(responder, contentType, headers));
         }
         
-        /// <summary>Create a new route with the given parameters.</summary>
-        public void Route(HttpMethod method, string path, SimpleTextResponderArgs responder, string contentType) {
-            Route(method, path, ResponderUtils.Transform(responder, contentType));
+        /// <inheritdoc cref="RouteDoc" />
+        public void Route(
+            HttpMethod method,
+            string path,
+            SimpleTextResponderArgs responder,
+            string contentType,
+            IHeaders headers
+        ) {
+            Route(method, path, ResponderUtils.Transform(responder, contentType, headers));
         }
         
-        /// <summary>Create a new route with the given parameters.</summary>
-        public void Route(HttpMethod method, string path, ComplexTextResponder responder, string contentType) {
-            Route(method, path, ResponderUtils.Transform(responder, contentType));
+        /// <inheritdoc cref="RouteDoc" />
+        public void Route(
+            HttpMethod method,
+            string path,
+            ComplexTextResponder responder,
+            string contentType,
+            IHeaders headers
+        ) {
+            Route(method, path, ResponderUtils.Transform(responder, contentType, headers));
         }
         
         /// <summary>

@@ -26,12 +26,16 @@ A user can reasonably infer that the server is registering a new route for GET r
 
 This is the desired type of API design. Avoid hiding things behind things like compile-time code generation (and, if possible, atttributes), where a user is forced to guess if and how their code will be transformed behind the scenes.
 
-## Code Quality and Comments
+## Code Quality, Comments, and Documentation
 
-Try to maintain the current quality and frequency of comments. Code that is difficult to understand even with comments should be rewritten unless doing so would result in significant performance regressions.
+Try to maintain the current quality and frequency of comments.
+
+When adding new APIs or changing the functionality of existing APIs, update the corresponding documentation under `docs/`.
+
+Code that is difficult to understand even with comments should be rewritten unless doing so would result in significant performance regressions.
 
 ## Git
 
-One commit per thing, and one thing per commit (consider a thing to be any reasonably significant and distinct item; e.g. a feature, bugfix, or enhancement). This ensures that the commit history is easily understandable, and one knows exactly what features they are including/excluding when performing `git checkout`.
+Please try and adhere, as best as possible, to the philosophy of "one commit per thing, and one thing per commit" (consider a thing to be any reasonably significant and distinct item; e.g. a feature, bugfix, or enhancement). This ensures that the commit history is easily understandable, and one knows exactly what features they are including/excluding when performing `git checkout`.
 
 Please use `git pull --rebase` to avoid ugly merge commits.

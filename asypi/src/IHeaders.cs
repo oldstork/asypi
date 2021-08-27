@@ -2,13 +2,13 @@ using System.Collections.Generic;
 
 namespace Asypi {
     /// <summary>A utility class for adding headers to an <see cref="HttpResponse"/></summary>
-    public interface Headers {
+    public interface IHeaders {
         /// <summary>A dictionary containing header values, indexed by header name.</summary>
         Dictionary<string, string> Values { get; }
     }
     
     /// <summary>A sensible default for headers.</summary>
-    public class DefaultHeaders : Headers {
+    public class DefaultHeaders : IHeaders {
         public Dictionary<string, string> Values { get; private set; }
         
         public DefaultHeaders() {

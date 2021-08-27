@@ -152,7 +152,7 @@ namespace Asypi {
         // cached body text
         string bodyText = null;
         /// <summary>The body text sent with the request.</summary>
-        public string Body {
+        public string BodyText {
             get {
                 if (bodyText == null) {
                     using (var reader = new StreamReader(inner.InputStream, Encoding.UTF8)) {
@@ -161,6 +161,19 @@ namespace Asypi {
                 }
                 
                 return bodyText;
+            }
+        }
+        
+        // cached body text
+        byte[] bodyBytes = null;
+        /// <summary>The body text sent with the request.</summary>
+        public byte[] BodyBytes {
+            get {
+                if (bodyBytes == null) {
+                    inner.InputStream.Read(bodyBytes, 0, (int) inner.InputStream.Length);
+                }
+                
+                return bodyBytes;
             }
         }
         
@@ -245,7 +258,7 @@ namespace Asypi {
         /// Attempting to set it multiple times will result in no changes and
         /// a logged warning.
         /// </summary>
-        public string Body {
+        public string BodyText {
             set {
                 if (bodySet) {
                     Log.Warning("[Asypi] Attempted to set body twice on response");
@@ -286,8 +299,8 @@ namespace Asypi {
             inner = response;
         }
         
-        /// <summary>Loads headers from the provided <see cref="Asypi.Headers"/> and sets the headers of the response to the loaded values.</summary>
-        public void LoadHeaders(Headers headers) {
+        /// <summary>Loads headers from the provided <see cref="Asypi.IHeaders"/> and sets the headers of the response to the loaded values.</summary>
+        public void LoadHeaders(IHeaders headers) {
             foreach (string header in headers.Values.Keys) {
                 Headers.Set(header, headers.Values[header]);
             }

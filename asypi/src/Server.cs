@@ -9,7 +9,11 @@ using Serilog;
 
 namespace Asypi {
     
-    /// <summary>Represents the minimum log level at which the logger will forward a log to its sinks. Corresponds directly to Serilog log levels.</summary>
+    /// <summary>
+    /// Represents the minimum log level at which
+    /// the logger will forward a log to its sinks.
+    /// Corresponds directly to Serilog log levels.
+    /// </summary>
     public enum LogLevel {
         Debug,
         Information,
@@ -18,21 +22,49 @@ namespace Asypi {
         Fatal
     }
     
+    
+    /// <summary>
+    /// Prevents creation of multiple servers,
+    /// which would be bad because servers modify 
+    /// global variables within the Asypi namespace
+    /// for user convenience purposes.
+    /// </summary>
+    static class ServerGuard {
+        /// <summary>Whether or not a server has already been created.</summary>
+        public static bool ServerExists = false;
+    }
+    
     /// <summary>Provides a simple, configurable, and scalable HTTP server.</summary>
     public class Server {
-        /// <summary>The port that the <see cref="Server"/> will bind to when <see cref="Server.Run()"/> or <see cref="Server.RunAsync()"/> is called.</summary>
+        /// <summary>
+        /// The port that the <see cref="Server"/> will bind to when
+        /// <see cref="Server.Run()"/> or <see cref="Server.RunAsync()"/> is called.
+        /// </summary>
         public int Port { get; private set; }
         
-        /// <summary>The hosts that the <see cref="Server"/> will bind to when <see cref="Server.Run()"/> or <see cref="Server.RunAsync()"/> is called.</summary>
+        /// <summary>
+        /// The hosts that the <see cref="Server"/> will bind to when
+        /// <see cref="Server.Run()"/> or <see cref="Server.RunAsync()"/> is called.
+        /// </summary>
         public IEnumerable Hosts { get; private set; }
         
-        /// <summary>The number of workers that the <see cref="Server"/> will create when <see cref="Server.Run()"/> or <see cref="Server.RunAsync()"/> is called.</summary>
-        public int WorkerCount { get; private set; }
-        
-        /// <summary>The <c>LogLevel</c> that the <see cref="Server"/> initialized the logger with.</summary>
+        /// <summary>
+        /// The <c>LogLevel</c> that the <see cref="Server"/>
+        /// initialized the logger with.
+        /// </summary>
         public LogLevel LogLevel { get; private set; }
         
-        /// <summary>The <c>Responder</c> that the <see cref="Server"/> will route requests to when no other valid routes were found.</summary>
+        /// <summary>
+        /// The LRU cache size that the <see cref="Server"/>
+        /// initialized <c>FileServer</c> with.
+        /// </summary>
+        public int LRUCacheSize { get; private set; }
+        
+        
+        /// <summary>
+        /// The <c>Responder</c> that the <see cref="Server"/>
+        /// will route requests to when no other valid routes were found.
+        /// </summary>
         public Responder Responder404 { get; private set; }
         
         /// <summary>The internal router of the <see cref="Server"/>.</summary>
@@ -43,30 +75,47 @@ namespace Asypi {
         public Server(
             int port = 8000,
             string hostname = "localhost",
-            int workerCount = 512,
-            LogLevel logLevel = LogLevel.Debug
+            LogLevel logLevel = LogLevel.Debug,
+            int LRUCacheSize = 64
         ) {
-            Init(port, new string[]{ hostname }, workerCount, logLevel);
+            Init(port, new string[]{ hostname }, logLevel, LRUCacheSize);
         }
         
         /// <summary>Creates a new <see cref="Server"/> with the provided parameters.</summary>
         public Server(
             int port,
             string[] hostnames,
-            int workerCount = 512,
-            LogLevel logLevel = LogLevel.Debug
+            LogLevel logLevel = LogLevel.Debug,
+            int LRUCacheSize = 64
         ) {
-            Init(port, hostnames, workerCount, logLevel);
+            Init(port, hostnames, logLevel, LRUCacheSize);
         }
         
         
-        /// <summary>Internal initializer of the <see cref="Server"/>. Allows multiple user-facing constructors without reusing code.</summary>
-        void Init(int port, IEnumerable hosts, int workerCount, LogLevel logLevel) {
+        /// <summary>
+        /// Internal initializer of the <see cref="Server"/>.
+        /// Allows multiple user-facing constructors without reusing code.
+        /// </summary>
+        void Init(int port, IEnumerable hosts, LogLevel logLevel, int LRUCacheSize) {
+            // Check if another server has already been created
+            if (ServerGuard.ServerExists) {
+                Log.Fatal(
+                    @"[Asypi] Only one server may run at a time.
+                    For more information, view the Server class under the API reference."
+                );
+                
+                throw new Exception("Attempted to create multiple instances of Asypi.Server");
+            }
+            
+            ServerGuard.ServerExists = true;
+            
+            
             // Set server configuration variables
-            Port = port;
-            Hosts = hosts;
-            WorkerCount = workerCount;
-            LogLevel = logLevel;
+            this.Port = port;
+            this.Hosts = hosts;
+            this.LogLevel = logLevel;
+            this.LRUCacheSize = LRUCacheSize;
+            
             
             // Initialize logger
             LoggerConfiguration logConfig = new LoggerConfiguration();
@@ -91,10 +140,35 @@ namespace Asypi {
             
             Serilog.Log.Logger = logConfig.WriteTo.Console().CreateLogger();
             
+            
+            // Bounds checking
+            if (this.LRUCacheSize < 1) {
+                Log.Fatal("[Asypi] Attempted to set LRU cache size to a number less than 1");
+                throw new Exception("Received invalid LRU cache size");
+            } else if (this.LRUCacheSize > 128) {
+                Log.Warning(
+                    "[Asypi] Setting LRU cache size to {0}; ensure system has sufficient memory",
+                    this.LRUCacheSize
+                );
+            }
+            
+            
+            // Initialize LRU cache
+            Params.FILESERVER_LRU_CACHE_SIZE = LRUCacheSize;
+            FileServer.Init();
+            
             // Initialize router
-            // This has to come after logger initialization because router initialization outputs some logs
+            // This has to come after logger initialization
+            // because router initialization outputs some logs
             Responder404 = ResponderUtils.Respond404;
             router = new Router();
+        }
+        
+        /// <summary>Resets the server</summary>
+        public void Reset() {
+            Log.Warning("[Asypi] Resetting server");
+            
+            router.Reset();
         }
         
         /// <summary>
@@ -120,23 +194,43 @@ namespace Asypi {
         /// Routes requests to <c>path</c> of method <c>method</c> to a simple responder that sets
         /// the body of the response to the output of the provided function, and the content type
         /// to <c>contentType</c>.
+        /// <br />
+        /// If no headers are provided, will use default headers.
         /// <inheritdoc cref="Server.PathsDoc" />
         /// </summary>
         void TransformedResponderRouteDoc() {}
         
         /// <inheritdoc cref="Server.TransformedResponderRouteDoc" />
-        public void Route(HttpMethod method, string path, SimpleTextResponder responder, string contentType) {
-            router.Route(method, path, responder, contentType);
+        public void Route(
+            HttpMethod method,
+            string path,
+            SimpleTextResponder responder,
+            string contentType,
+            IHeaders headers = null
+        ) {
+            router.Route(method, path, responder, contentType, headers);
         }
         
         /// <inheritdoc cref="Server.TransformedResponderRouteDoc" />
-        public void Route(HttpMethod method, string path, SimpleTextResponderArgs responder, string contentType) {
-            router.Route(method, path, responder, contentType);
+        public void Route(
+            HttpMethod method,
+            string path,
+            SimpleTextResponderArgs responder,
+            string contentType,
+            IHeaders headers = null
+        ) {
+            router.Route(method, path, responder, contentType, headers);
         }
         
         /// <inheritdoc cref="Server.TransformedResponderRouteDoc" />
-        public void Route(HttpMethod method, string path, ComplexTextResponder responder, string contentType) {
-            router.Route(method, path, responder, contentType);
+        public void Route(
+            HttpMethod method,
+            string path,
+            ComplexTextResponder responder,
+            string contentType,
+            IHeaders headers = null
+        ) {
+            router.Route(method, path, responder, contentType, headers);
         }
         
         
@@ -154,11 +248,15 @@ namespace Asypi {
             router.Route(HttpMethod.Get, path, (HttpRequest req, HttpResponse res, List<string> args) => {
                 byte[] bytes = FileServer.Get(filePath);
                 
-                res.ContentType = MimeGuesser.GuessTypeByExtension(filePath);
-                
-                res.LoadHeaders(DefaultHeadersInstance.Instance);
-                
-                res.BodyBytes = bytes;
+                if (bytes == null) {
+                    Responder404(req, res, args);
+                } else {
+                    res.ContentType = MimeGuesser.GuessTypeByExtension(filePath);
+                    
+                    res.LoadHeaders(DefaultHeadersInstance.Instance);
+                    
+                    res.BodyBytes = bytes;
+                }
             });
         }
         
@@ -241,7 +339,7 @@ namespace Asypi {
         /// to <c>contentType</c>.
         /// </summary>
         public void Set404Responder(SimpleTextResponder responder, string contentType) {
-            Responder404 = ResponderUtils.Transform(responder, contentType);
+            Responder404 = ResponderUtils.Transform(responder, contentType, null);
         }
         
         /// <summary>
@@ -250,7 +348,7 @@ namespace Asypi {
         /// to <c>contentType</c>.
         /// </summary>
         public void Set404Responder(ComplexTextResponder responder, string contentType) {
-            Responder404 = ResponderUtils.Transform(responder, contentType);
+            Responder404 = ResponderUtils.Transform(responder, contentType, null);
         }
         
         /// <summary>Runs the server. For a sync wrapper, consider <see cref="Server.Run()"/>.</summary>
@@ -273,21 +371,15 @@ namespace Asypi {
                     }
                 }
                 
-                Log.Information("[Asypi] Starting server with {0} workers", WorkerCount);
+                Log.Information("[Asypi] Starting server");
                 
                 listener.Start();
                 
-                // create workers
-                for (int i = 0; i < WorkerCount; i++) {
-                    Worker worker = new Worker(this, router);
-                    
-                    worker.Run(listener);
-                }
-                
                 while (true) {
-                    // let workers work
-                    // an infinite loop is required here because otherwise the main thread would complete,
-                    // killing all the workers
+                    // whenever we get a request, make a worker to handle it
+                    HttpListenerContext context = listener.GetContext();
+                    Worker worker = new Worker(this, router);
+                    worker.Run(context);
                 }
             });
         }
