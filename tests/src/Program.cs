@@ -12,6 +12,9 @@ namespace AsypiTests {
             TestRunner.RunTest("Root Route Positive", RoutingTests.RootRoutePositive);
             TestRunner.RunTest("Root Route Negative", RoutingTests.RootRouteNegative);
             
+            TestRunner.RunTest("Route Static Dir Match Include", StaticFileRoutingTests.RouteStaticDirMatchInclude);
+            TestRunner.RunTest("Route Static Dir Match Exclude", StaticFileRoutingTests.RouteStaticDirMatchExclude);
+            
             TestRunner.PrintConclusions();
         }
     }

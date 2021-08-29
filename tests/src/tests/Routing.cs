@@ -20,7 +20,7 @@ namespace AsypiTests {
             
             server.Route(HttpMethod.Get, "/", () => { return "Hello World!"; }, "text/plain");
             
-            return CliLink.CurlTest("-X GET localhost:8000/noroute", ".*");
+            return CliLink.CurlTest("-X GET localhost:8000/noroute", "^<!DOCTYPE html><html><body><h1>Error 404</h1><p>Resource not found</p></body></html>$");
         }
     }
 }

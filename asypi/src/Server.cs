@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using Serilog;
@@ -261,7 +262,7 @@ namespace Asypi {
         }
         
         /// <summary>
-        /// Routes requests to paths under <c>mountRoot</c> to files under <c>dirRoot</c>.
+        /// Routes requests to paths matching <c>match</c> under <c>mountRoot</c> to files under <c>dirRoot</c>.
         /// Content types will be guessed.
         /// <br />
         /// If <c>maxDepth</c> is not set, will recursively include all subdirectories of <c>dirRoot</c>.
@@ -272,7 +273,7 @@ namespace Asypi {
         /// <br />
         /// If finer control is necessary, consider mounting individual files using <c>Server.RouteStaticFile()</c>.
         /// </summary>
-        public void RouteStaticDir(string mountRoot, string dirRoot, int? maxDepth = null) {
+        public void RouteStaticDir(string mountRoot, string dirRoot, int? maxDepth = null, string match = ".*") {
             // It's possible to have a trailing slash if the provided mountRoot is /
             string eMountRoot = mountRoot[mountRoot.Length - 1] == '/' ? mountRoot.Substring(0, mountRoot.Length - 1) : mountRoot;
             
@@ -286,16 +287,21 @@ namespace Asypi {
                 return;
             }
             
+            Regex regex = new Regex(match);
+            
             // for every file in dirRoot
             foreach (string filePath in files) {
-                // get the filename only and mount it
-                // this works because when we recursively call RouteStaticDir(),
-                // we also change mountRoot
-                string[] filePathSplit = Utils.SplitFilePath(filePath);
-                
-                string mountPath = String.Format("{0}/{1}", eMountRoot, filePathSplit[filePathSplit.Length - 1]);
-                
-                RouteStaticFile(mountPath, filePath);
+                // match against pattern
+                if (regex.Match(filePath).Success) {
+                    // get the filename only and mount it
+                    // this works because when we recursively call RouteStaticDir(),
+                    // we also change mountRoot
+                    string[] filePathSplit = Utils.SplitFilePath(filePath);
+                    
+                    string mountPath = String.Format("{0}/{1}", eMountRoot, filePathSplit[filePathSplit.Length - 1]);
+                    
+                    RouteStaticFile(mountPath, filePath);
+                }
             }
             
             

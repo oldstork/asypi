@@ -68,9 +68,9 @@ Note that `DefaultHeaders` contains `X-Content-Type-Options: nosniff`.
 
 ---
 
-#### `RouteStaticDir(string mountRoot, string dirRoot, int? maxDepth = null)`
+#### `RouteStaticDir(string mountRoot, string dirRoot, int? maxDepth = null, string match = ".*")`
 
-Routes requests to paths under `mountRoot` to files under `dirRoot`. Content types will be guessed.
+Routes requests to paths matching `match` under `mountRoot` to files under `dirRoot`. Content types will be guessed.
 
 If `maxDepth` is not set, will recursively include all subdirectories of `dirRoot`. Otherwise, will only include subdirectories to a depth of `maxDepth`. For example, with `maxDepth` set to `1`, will only include files directly under `dirRoot`.
 
