@@ -35,7 +35,13 @@ namespace AsypiTests {
             Thread.Sleep(32);
             
             Regex regex = new Regex(regexPattern);
-            return regex.Match(text).Success;
+            bool success = regex.Match(text).Success;
+            
+            if (Program.Verbose) {
+                Console.WriteLine("Expected: {0}; Found: {1}", regexPattern, text);
+            }
+            
+            return success;
         }
     }
 }

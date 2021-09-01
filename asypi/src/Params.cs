@@ -7,7 +7,7 @@ namespace Asypi {
         public const int MAX_PATH_LENGTH = 1024;
         
         /// <summary>The number of files cached by <see cref="FileServer"/> at a time.</summary>
-        public static int FILESERVER_LRU_CACHE_SIZE = 32;
+        public static int FileServerLRUCacheSize = 32;
     }
     
 }

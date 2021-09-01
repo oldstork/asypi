@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Text.RegularExpressions;
 
 using Serilog;
 
@@ -36,10 +37,18 @@ namespace Asypi {
             this.Method = method;
             this.Path = path;
             
+            if (this.Path.Length < 1) {
+                Log.Fatal("[Asypi] Cannot create a route to an empty path");
+                throw new Exception("Attempted to create a route to an empty path.");
+            } else if (this.Path[0] != '/') {
+                Log.Warning("[Asypi] Route path specified without preceding slash");
+                this.Path = String.Format("/{0}", this.Path);
+            }
+            
             Parameterized = false;
             
             // split path into its parts
-            List<string> split = Utils.SplitPath(path);
+            List<string> split = Utils.SplitPath(path, true);
             
             // for each part of the path
             foreach (string substr in split) {
@@ -90,8 +99,8 @@ namespace Asypi {
         }
         
         /// <summary>Runs the associated <see cref="Responder"/> of the <see cref="Route"/> with the provided arguments.</summary>
-        public void Run(HttpRequest req, HttpResponse res, List<string> args) {
-            responder(req, res, args);
+        public void Run(HttpRequest req, HttpResponse res) {
+            responder(req, res);
         }
     }
     
@@ -104,6 +113,13 @@ namespace Asypi {
         /// <summary>Non-parameterized routes by path</summary>
         Dictionary<HttpMethod, Dictionary<string, Route>> nonParameterizedRoutes = 
             new Dictionary<HttpMethod, Dictionary<string, Route>>();
+        
+        
+        /// <summary>
+        /// List of match expressions and corresponding middleware
+        /// </summary>
+        List<(Regex, Middleware)> middleware = new List<(Regex, Middleware)>();
+        
         
         /// <summary>Creates a new <see cref="Router"/>.</summary>
         public Router() {
@@ -119,7 +135,7 @@ namespace Asypi {
             }
         }
         
-        /// <summary>Resets all routes</summary>
+        /// <summary>Resets all routes and middleware</summary>
         public void Reset() {
             Log.Warning("[Asypi] Resetting router");
             
@@ -132,6 +148,8 @@ namespace Asypi {
             foreach (Dictionary<string, Route> routeLookup in nonParameterizedRoutes.Values) {
                 routeLookup.Clear();
             }
+            
+            middleware.Clear();
         }
         
         /// <summary>
@@ -150,7 +168,7 @@ namespace Asypi {
                 nonParameterizedRoutes[method][route.Path] = route;
             }
             
-            Log.Debug("[Asypi] Registered route {0} {1}", method.AsString(), path);
+            Log.Debug("[Asypi] Registered route {0} {1}", method.AsString(), route.Path);
         }
         
         /// <inheritdoc cref="RouteDoc" />
@@ -168,17 +186,6 @@ namespace Asypi {
         public void Route(
             HttpMethod method,
             string path,
-            SimpleTextResponderArgs responder,
-            string contentType,
-            IHeaders headers
-        ) {
-            Route(method, path, ResponderUtils.Transform(responder, contentType, headers));
-        }
-        
-        /// <inheritdoc cref="RouteDoc" />
-        public void Route(
-            HttpMethod method,
-            string path,
             ComplexTextResponder responder,
             string contentType,
             IHeaders headers
@@ -186,41 +193,78 @@ namespace Asypi {
             Route(method, path, ResponderUtils.Transform(responder, contentType, headers));
         }
         
+        
+        /// <summary>
+        /// Registers the middleware for use on all paths matching
+        /// <c>matchExpression</c>.
+        /// </summary>
+        public void Use(string matchExpression, Middleware md) {
+            Log.Debug("[Asypi] Registered middleware {0}", matchExpression);
+            
+            middleware.Add((new Regex(matchExpression), md));
+        }
+        
+        
         /// <summary>
         /// Runs the route matching <c>method</c> and <c>path</c> with the given parameters.
         /// <br />
         /// Returns true if a path was found and run, and false otherwise.
         /// </summary>
         public bool RunRoute(HttpMethod method, string path, HttpRequest req, HttpResponse res) {
+            Route route = null;
+            
             // check if path corresponds to a non-parameterized route first
             if (nonParameterizedRoutes[method].ContainsKey(path)) {
+                
                 // if we found a corresponding route, go and run it
-                Route route = nonParameterizedRoutes[method][path];
-                
-                route.Run(req, res, new List<string>());
-                
-                return true;
+                route = nonParameterizedRoutes[method][path];
             } else {
                 // if we can't find a non-parameterized route, first get the length of the path
                 List<string> split = Utils.SplitPath(path);
                 
                 // then match against parameterized routes of same method and same route length
-                foreach (Route route in routes[method][split.Count]) {
-                    if (route.Parameterized) {
-                        List<string> args = route.Match(split);
+                foreach (Route r in routes[method][split.Count]) {
+                    if (r.Parameterized) {
+                        List<string> args = r.Match(split);
                         
                         // if route matched
                         if (args != null) {
-                            // run the route
-                            route.Run(req, res, args);
+                            route = r;
+                            req.Args = args;
                             
-                            return true;
+                            break;
                         }
                     }
                 }
             }
             
-            return false;
+            // if we found a route
+            if (route != null) {
+                bool shouldContinue = true;
+                
+                // run middleware
+                foreach ((Regex r, Middleware m) in middleware) {
+                    if (r.Match(path).Success) {
+                        shouldContinue = m(req, res);
+                        
+                        if (!shouldContinue) {
+                            break;
+                        }
+                    }
+                }
+                
+                if (shouldContinue) {
+                    route.Run(req, res);
+                }
+                
+                // signal that route found
+                return true;
+            } else {
+                // if no route was found
+                return false;
+            }
+            
+            
         }
     }
 }

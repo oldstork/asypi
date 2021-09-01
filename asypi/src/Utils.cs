@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
+using Serilog;
 
 namespace Asypi {
     /// <summary>Basic miscellaneous internal utils.</summary>
@@ -11,15 +11,26 @@ namespace Asypi {
             return new List<T>( (T[])  Enum.GetValues(typeof(T)) );
         }
         
-        /// <summary>Split a request path into its components.</summary>
-        public static List<string> SplitPath(string path) {
-            string[] initial = path.Split('/');
-            
+        /// <summary>
+        /// Split a request path into its components.
+        /// If path is internal (not from an outside request),
+        /// will log warnings if issues occur.
+        /// </summary>
+        public static List<string> SplitPath(string path, bool isInternal = false) {
             List<string> splitPath = new List<string>();
+            
+            // deal with a few edge cases
+            if (path.Length <= 1) {
+                return splitPath;
+            }
+            
+            string[] initial = path.Split('/');
             
             foreach (string str in initial) {
                 if (str.Length > 0 && Validation.IsSubPathValid(str)) {
                     splitPath.Add(str);
+                } else if (isInternal) {
+                    Log.Warning("[Asypi] Could not successfully split path {0} into subpaths", path);
                 }
             }
             

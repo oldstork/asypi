@@ -5,9 +5,8 @@ using System.Net;
 namespace Asypi {
     /// <summary>Responds to HTTP requests.</summary>
     public delegate void Responder(
-        HttpRequest request,
-        HttpResponse response,
-        List<string> args
+        HttpRequest req,
+        HttpResponse res
     );
     
     /// <summary>
@@ -22,10 +21,7 @@ namespace Asypi {
     public delegate string SimpleTextResponder();
     
     /// <inheritdoc cref="TransformedResponderDoc"/>
-    public delegate string SimpleTextResponderArgs(List<string> args);
-    
-    /// <inheritdoc cref="TransformedResponderDoc"/>
-    public delegate string ComplexTextResponder(HttpRequest request, HttpResponse response);
+    public delegate string ComplexTextResponder(HttpRequest req, HttpResponse res);
     
     /// <summary>A set of utilities for working with and transforming things into <see cref="Responder"/>s.</summary>
     static class ResponderUtils {
@@ -63,21 +59,8 @@ namespace Asypi {
             string contentType,
             IHeaders headers
         ) {
-            return (HttpRequest req, HttpResponse res, List<string> args) => {
+            return (HttpRequest req, HttpResponse res) => {
                 string responseText = simpleTextResponder();
-                
-                SimpleResponse(req, res, responseText, contentType, headers);
-            };
-        }
-        
-        /// <inheritdoc cref="ResponderTransformerDoc"/>
-        public static Responder Transform(
-            SimpleTextResponderArgs simpleTextResponderArgs,
-            string contentType,
-            IHeaders headers
-        ) {
-            return (HttpRequest req, HttpResponse res, List<string> args) => {
-                string responseText = simpleTextResponderArgs(args);
                 
                 SimpleResponse(req, res, responseText, contentType, headers);
             };
@@ -89,7 +72,7 @@ namespace Asypi {
             string contentType,
             IHeaders headers
         ) {
-            return (HttpRequest req, HttpResponse res, List<string> args) => {
+            return (HttpRequest req, HttpResponse res) => {
                 string responseText = complexTextResponder(req, res);
                 
                 SimpleResponse(req, res, responseText, contentType, headers);
@@ -103,10 +86,10 @@ namespace Asypi {
         }, "text/html", null);
         
         /// <summary>A sensible default 404 <see cref="Responder"/>.</summary>
-        public static void Respond404(HttpRequest req, HttpResponse res, List<string> args) {
+        public static void Respond404(HttpRequest req, HttpResponse res) {
             res.StatusCode = (int) HttpStatusCode.NotFound;
             
-            Respond404Text(req, res, args);
+            Respond404Text(req, res);
         }
     }
 }

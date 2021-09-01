@@ -83,7 +83,7 @@ namespace Asypi {
                         // if no matching responders were found
                         if (!didFindRoute) {
                             // respond with the server's 404 responder
-                            Server.Responder404(req, res, new List<string>());
+                            Server.Responder404(req, res);
                         }
                     } else {
                         // if path could not be parsed or method not recognized
@@ -96,12 +96,21 @@ namespace Asypi {
                     // stop the stopwatch to get a reading
                     stopwatch.Stop();
                     
+                    IPEndPoint remoteEndPoint;
+                    
+                    // this can fail so its in a try catch block
+                    try {
+                        remoteEndPoint = req.RemoteEndPoint;
+                    } catch (Exception) {
+                        remoteEndPoint = new IPEndPoint(0, 0);
+                    }
+                    
                     // log request diagnostics
                     Log.Information(
                         "[Asypi] {0} {1}: {2} => {3} {4} ({5})",
-                        httpRequest.RemoteEndPoint,
+                        remoteEndPoint,
                         httpRequest.HttpMethod,
-                        httpRequest.Url,
+                        req.Url,
                         requestPath,
                         res.StatusCode,
                         String.Format("{0}ms", stopwatch.ElapsedMilliseconds)

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 using System.Text;
@@ -148,6 +149,15 @@ namespace Asypi {
         /// <returns>A <see cref="string"/> array that contains the languages specified in the request's <see cref="HttpRequestHeader.AcceptLanguage"/> header or <c>null</c> if the client request did not include an <see cref="HttpRequestHeader.AcceptLanguage"/> header.</returns>
         public string[] UserLanguages { get { return inner.UserLanguages; } }
         
+        /// <summary>
+        /// The values of applicable variable parameters.
+        /// <br />
+        /// For example, if a route was registered with the path <c>/{name}</c>,
+        /// and a user requested <c>/joe</c>, the args in the resulting
+        /// <see cref="HttpRequest" /> will contain <c>["joe"].</c>
+        /// </summary>
+        public List<string> Args { get; set; }
+        
         
         // cached body text
         string bodyText = null;
@@ -180,6 +190,9 @@ namespace Asypi {
         /// <summary>Creates a new <see cref="HttpRequest"/> wrapping the provided <see cref="HttpListenerRequest"/>.</summary>
         public HttpRequest(HttpListenerRequest request) {
             inner = request;
+            
+            // ensure we have no uninitialized access attempt bugs
+            Args = new List<string>();
         }
     }
     

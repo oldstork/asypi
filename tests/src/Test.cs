@@ -38,10 +38,13 @@ namespace AsypiTests {
             
             Console.ForegroundColor = defaultColor;
             Console.Write("\n");
+            
+            if (Program.Verbose) {
+                Console.WriteLine("--\n");
+            }
         }
         
         public static void PrintConclusions() {
-            Console.WriteLine("");
             Console.WriteLine("----------------");
             
             ConsoleColor defaultColor = Console.ForegroundColor;

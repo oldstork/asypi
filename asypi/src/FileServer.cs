@@ -15,8 +15,8 @@ namespace Asypi {
         
         
         public static void Init() {
-            recency = new string[Params.FILESERVER_LRU_CACHE_SIZE];
-            end = Params.FILESERVER_LRU_CACHE_SIZE - 1;
+            recency = new string[Params.FileServerLRUCacheSize];
+            end = Params.FileServerLRUCacheSize - 1;
         }
         
         static void AdvanceLRUIndices() {
@@ -25,15 +25,15 @@ namespace Asypi {
             // and farther from start
             
             start -= 1;
-            if (start < 0) start = Params.FILESERVER_LRU_CACHE_SIZE - 1;
+            if (start < 0) start = Params.FileServerLRUCacheSize - 1;
             
             end -= 1;
-            if (end < 0) end = Params.FILESERVER_LRU_CACHE_SIZE - 1;
+            if (end < 0) end = Params.FileServerLRUCacheSize - 1;
         }
         
         /// <summary>Add a file-value pair to the LRU cache, and update the cache as necessary.</summary>
         static void Cache(string filePath, byte[] value) {
-            for (int i = 0; i < Params.FILESERVER_LRU_CACHE_SIZE; i++) {
+            for (int i = 0; i < Params.FileServerLRUCacheSize; i++) {
                 if (recency[i] == filePath) {
                     // if we found filePath in the cache
                     // swap it with the first item in the cache

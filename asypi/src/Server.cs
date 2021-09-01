@@ -155,7 +155,7 @@ namespace Asypi {
             
             
             // Initialize LRU cache
-            Params.FILESERVER_LRU_CACHE_SIZE = LRUCacheSize;
+            Params.FileServerLRUCacheSize = LRUCacheSize;
             FileServer.Init();
             
             // Initialize router
@@ -216,17 +216,6 @@ namespace Asypi {
         public void Route(
             HttpMethod method,
             string path,
-            SimpleTextResponderArgs responder,
-            string contentType,
-            IHeaders headers = null
-        ) {
-            router.Route(method, path, responder, contentType, headers);
-        }
-        
-        /// <inheritdoc cref="Server.TransformedResponderRouteDoc" />
-        public void Route(
-            HttpMethod method,
-            string path,
             ComplexTextResponder responder,
             string contentType,
             IHeaders headers = null
@@ -246,11 +235,11 @@ namespace Asypi {
         /// <inheritdoc cref="Server.DefaultHeadersNoteDoc" />
         /// </summary>
         public void RouteStaticFile(string path, string filePath, string contentType = null) {
-            router.Route(HttpMethod.Get, path, (HttpRequest req, HttpResponse res, List<string> args) => {
+            router.Route(HttpMethod.Get, path, (HttpRequest req, HttpResponse res) => {
                 byte[] bytes = FileServer.Get(filePath);
                 
                 if (bytes == null) {
-                    Responder404(req, res, args);
+                    Responder404(req, res);
                 } else {
                     res.ContentType = MimeGuesser.GuessTypeByExtension(filePath);
                     
@@ -355,6 +344,15 @@ namespace Asypi {
         /// </summary>
         public void Set404Responder(ComplexTextResponder responder, string contentType) {
             Responder404 = ResponderUtils.Transform(responder, contentType, null);
+        }
+        
+        
+        /// <summary>
+        /// Registers the middleware for use on all paths matching
+        /// <c>matchExpression</c>.
+        /// </summary>
+        public void Use(string matchExpression, Middleware middleware) {
+            router.Use(matchExpression, middleware);
         }
         
         /// <summary>Runs the server. For a sync wrapper, consider <see cref="Server.Run()"/>.</summary>

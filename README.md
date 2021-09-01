@@ -6,6 +6,12 @@ A simple, asynchronous, and scalable HTTP server built on `System.Net.HttpListen
 
 [Docs](https://asypi.readthedocs.io/en/latest/)
 
+[nuget](https://www.nuget.org/packages/Asypi/)
+
+## Installation
+
+`dotnet add package Asypi`
+
 ## Hello World Example
 
 ```C#
@@ -45,7 +51,6 @@ server.Run();
 - **Stable.** Do not use Asypi if you need stability.
 - **Well-Tested.** Do not use Asypi for mission-critical or security-critical applications.
 - Suitable for production usage unless if you *really* know what you're doing.
-- Good for complex projects. For complex needs, consider alternatives such as ASP.NET.
 
 Hopefully, as the project progresses, the these caveats can be removed.
 

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>Asypi</id>
+    <version>0.0.5</version>
+    <title>Asypi</title>
+    <authors>Asypi Contributors</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/therealstork/asypi</projectUrl>
+    <description>A simple, asynchronous, and scalable HTTP server.</description>
+    <copyright>Copyright ©2021 Asypi Contributors</copyright>
+    <tags>http server http-server web</tags>
+    <dependencies>
+      <dependency id="Serilog" version="2.10.0" />
+      <dependency id="Serilog.Sinks.Console" version="3.1.1" />
+    </dependencies>
+  </metadata>
+</package>

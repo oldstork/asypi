@@ -62,10 +62,10 @@ Server server = new Server(8000, "localhost");
 server.Route(
     HttpMethod.Get,
     "/{name}",
-    (List<string> args) => { 
+    (HttpRequest req, HttpResponse res) => { 
         return String.Format(
             "Hello {0}!",
-            args[0]
+            req.Args[0]
         );
     },
     "text/html"
@@ -88,7 +88,7 @@ server.Run();
 In Asypi, each route is assigned a responder that fires whenever the route is accessed. A basic responder has the following signature and returns `void`:
 
 ```C#
-(HttpRequest res, HttpResponse res, List<string> args) => {
+(HttpRequest res, HttpResponse res) => {
     // do something
 }
 ```
@@ -98,17 +98,12 @@ For convenience, a number of other responder signatures are supported out of the
 ```C#
 () => {
     // do something
-    return body;
+    return bodyText;
 }
 
-(List<string> args) => {
+(HttpRequest req, HttpResponse res) => {
     // do something
-    return body;
-}
-
-(HttpRequest req, HttpResponse res, List<string> args) => {
-    // do something
-    return body;
+    return bodyText;
 }
 ```
 

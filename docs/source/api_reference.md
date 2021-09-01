@@ -54,8 +54,6 @@ Paths can include variable parameters, the values of which will be forwarded to 
 
 `void Route(HttpMethod method, string path, SimpleTextResponder responder, string contentType, IHeaders headers = null)`
 
-`void Route(HttpMethod method, string path, SimpleTextResponderArgs responder, string contentType, IHeaders headers = null)`
-
 `void Route(HttpMethod method, string path, ComplexTextResponder responder, string contentType, IHeaders headers = null)`
 
 ### Static File Routing
@@ -88,6 +86,10 @@ If finer control is necessary, consider mounting individual files using `Server.
 
 ### Other Methods
 
+### `void Use(string matchExpression, Middleware middleware)`
+
+Registers the middleware for use on all paths matching `matchExpression`.
+
 #### `void Reset()`
 
 Resets the server. This will remove all previously registered routes.
@@ -106,6 +108,9 @@ Runs the server. For a sync wrapper, consider `Server.Run()`.
 
 Runs the server. This will block the thread until the server stops running. For async, consider `Server.RunAsync()`.
 
+<br />
+<br />
+
 ## **Responders**
 
 Under the hood, all requests in Asypi are handled by a responder with the following delegate:
@@ -113,8 +118,7 @@ Under the hood, all requests in Asypi are handled by a responder with the follow
 ```C#
 public delegate void Responder(
     HttpRequest request,
-    HttpResponse response,
-    List<string> args
+    HttpResponse response
 );
 ```
 
@@ -122,11 +126,13 @@ However, for convenience, simplified responders are also generally accepted. The
 
 ```C#
 public delegate string SimpleTextResponder();
-public delegate string SimpleTextResponderArgs(List<string> args);
-public delegate string ComplexTextResponder(HttpRequest request, HttpResponse response);
+public delegate string ComplexTextResponder(HttpRequest req, HttpResponse res);
 ```
 
 Under the hood, each of these are wrapped by a `Responder` that sets the body of the `HttpResponse` to the string output of the simplified responder, sets content type to a separately provided value, and sets headers.
+
+<br />
+<br />
 
 ## **HttpMethod**
 
@@ -147,6 +153,9 @@ Asypi also contains a few convenience items for working with `HttpMethod`s:
 
 `HttpMethod.AsString()`
 
+<br />
+<br />
+
 ## **HttpRequest**
 
 `HttpRequest` is a wrapper over `System.Net.HttpListenerRequest`, exposing relevant fields.
@@ -163,9 +172,18 @@ Gets the body of the request, as a `string`.
 
 Gets the body of the request, as a `byte[]`.
 
+### `List<string> args`
+
+The values of applicable variable parameters.
+
+For example, if a route was registered with the path `/{name}`, and a user requested `/joe`, the args in the resulting HttpRequest will contain `["joe"]`.
+
 ### Other Public Fields
 
 The majority of the fields in `System.Net.HttpListenerRequest` are directly wrapped by `HttpRequest`. For more information on these fields, refer to [Microsoft's official documentation](https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistenerrequest?view=net-5.0).
+
+<br />
+<br />
 
 ## **HttpResponse**
 
@@ -187,6 +205,9 @@ Sets the body of the response, as a `byte[]`.
 
 The majority of the fields in `System.Net.HttpListenerResponse` are directly wrapped by `HttpResponse`. For more information on these fields, refer to [Microsoft's official documentation](https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistenerresponse?view=net-5.0).
 
+<br />
+<br />
+
 ## **IHeaders**
 
 ```C#
@@ -194,6 +215,9 @@ public interface IHeaders {
     Dictionary<string, string> Values { get; }
 }
 ```
+
+<br />
+<br />
 
 ## **DefaultHeaders**
 
@@ -206,6 +230,9 @@ X-Content-Type-Options: nosniff
 X-Frame-Options: SAMEORIGIN
 Content-Security-Policy: script-src 'self'
 ```
+
+<br />
+<br />
 
 ## **FileServer**
 

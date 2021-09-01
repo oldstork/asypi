@@ -10,4 +10,5 @@ Asypi Documentation
    getting_started.md
    setup_routing_responders.md
    static_files.md
+   middleware.md
    api_reference.md
