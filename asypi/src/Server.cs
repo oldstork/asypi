@@ -243,7 +243,7 @@ namespace Asypi {
                 } else {
                     res.ContentType = MimeGuesser.GuessTypeByExtension(filePath);
                     
-                    res.LoadHeaders(DefaultHeadersInstance.Instance);
+                    res.LoadHeaders(DefaultServerHeaders.Instance);
                     
                     res.BodyBytes = bytes;
                 }

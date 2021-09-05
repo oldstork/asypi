@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Asypi</id>
-    <version>0.0.5</version>
+    <version>0.0.6</version>
     <title>Asypi</title>
     <authors>Asypi Contributors</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -11,9 +11,17 @@
     <description>A simple, asynchronous, and scalable HTTP server.</description>
     <copyright>Copyright ©2021 Asypi Contributors</copyright>
     <tags>http server http-server web</tags>
+    
     <dependencies>
-      <dependency id="Serilog" version="2.10.0" />
-      <dependency id="Serilog.Sinks.Console" version="3.1.1" />
+      <group targetFramework="net5.0">
+        <dependency id="Serilog" version="2.10.0" />
+        <dependency id="Serilog.Sinks.Console" version="3.1.1" />
+      </group>
     </dependencies>
   </metadata>
+  
+  <files>
+    <file src="bin\Release\net5.0\asypi.dll" target="lib\net5.0" />
+    <file src="bin\Release\net5.0\asypi.xml" target="lib\net5.0" />
+  </files>
 </package>

@@ -7,6 +7,9 @@ namespace Asypi {
         Dictionary<string, string> Values { get; }
     }
     
+    
+    // DefaultHeaders is not static so that it can implement the Headers interface, and so that it is itself inheritable.
+    
     /// <summary>A sensible default for headers.</summary>
     public class DefaultHeaders : IHeaders {
         public Dictionary<string, string> Values { get; private set; }
@@ -18,16 +21,15 @@ namespace Asypi {
             Values["X-Content-Type-Options"] = "nosniff";
             Values["X-XSS-Protection"] = "1; mode=block";
             Values["X-Frame-Options"] = "SAMEORIGIN";
-            Values["Content-Security-Policy"] = "script-src 'self'";
+            Values["Content-Security-Policy"] = "script-src 'self'; object-src 'none'; require-trusted-types-for 'script'";
         }
     }
     
-    /// <summary>A global static instance of <see cref="DefaultHeaders"/>.</summary>
-    public static class DefaultHeadersInstance {
-        /// <summary>The internal <see cref="DefaultHeaders"/> instance of <see cref="DefaultHeadersInstance"/>.</summary>
-        public static DefaultHeaders Instance = new DefaultHeaders();
+    /// <summary>The <see cref="IHeaders" /> instance used by the <see cref="Server" /> for special responders (e.g. <see cref="Server.RouteStaticFile(string, string, string)" />) by default.</summary>
+    public static class DefaultServerHeaders {
+        /// <summary>The internal instance of <see cref="DefaultServerHeaders"/>.</summary>
+        public static IHeaders Instance = new DefaultHeaders();
         
         // C# does not allow top-level static variable definitions, so this class is necessary.
-        // DefaultHeaders is not static so that it can implement the Headers interface, and so that it is itself inheritable.
     }
 }

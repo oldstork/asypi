@@ -228,8 +228,23 @@ Server: Asypi
 X-Content-Type-Options: nosniff
 "X-XSS-Protection: 1; mode=block
 X-Frame-Options: SAMEORIGIN
-Content-Security-Policy: script-src 'self'
+Content-Security-Policy: script-src 'self'; object-src 'none'; require-trusted-types-for 'script'
 ```
+
+Note that `DefaultHeaders` does *NOT* contain `Strict-Transport-Security`, to ensure that Asypi projects work in development. Consider inheriting `DefaultHeaders` and adding this header.
+
+<br />
+<br />
+
+## **DefaultServerHeaders**
+
+`DefaultServerHeaders` is a static class with a single public member, `Instance`. When no headers are specified for a special responder (e.g. when using `Server.RouteStaticFile()`), `DefaultServerHeaders.Instance` will be loaded by the server.
+
+### Public Fields
+
+#### `static IHeaders Instance`
+
+The internal instance of `DefaultServerHeaders`.
 
 <br />
 <br />
