@@ -16,7 +16,7 @@ namespace Asypi {
         /// <summary>Matches if and only if input text is a valid hostname.</summary>
         public static Regex HostnameRegex { get; private set; }
         
-        const string SUBPATH_REGEX = "^[a-zA-Z0-9-_{}]*$";
+        const string SUBPATH_REGEX = "^[a-zA-Z0-9.-_{}]*$";
         /// <summary>Matches if and only if input text is a valid subpath.</summary>
         public static Regex SubPathRegex { get; private set; }
         

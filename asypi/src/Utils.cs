@@ -27,10 +27,14 @@ namespace Asypi {
             string[] initial = path.Split('/');
             
             foreach (string str in initial) {
-                if (str.Length > 0 && Validation.IsSubPathValid(str)) {
-                    splitPath.Add(str);
-                } else if (isInternal) {
-                    Log.Warning("[Asypi] Could not successfully split path {0} into subpaths", path);
+                // we're going to get some 0 length sub strings
+                // because of the preceding slash
+                if (str.Length > 0) {
+                    if (Validation.IsSubPathValid(str)) {
+                        splitPath.Add(str);
+                    } else {
+                        Log.Warning("[Asypi] Could not successfully split path {0} into subpaths", path);
+                    }
                 }
             }
             
