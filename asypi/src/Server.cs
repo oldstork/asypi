@@ -56,10 +56,10 @@ namespace Asypi {
         public LogLevel LogLevel { get; private set; }
         
         /// <summary>
-        /// The LRU cache size that the <see cref="Server"/>
+        /// The maximum LFU cache size, in MiB, that the <see cref="Server"/>
         /// initialized <c>FileServer</c> with.
         /// </summary>
-        public int LRUCacheSize { get; private set; }
+        public int LFUCacheSize { get; private set; }
         
         
         /// <summary>
@@ -77,9 +77,9 @@ namespace Asypi {
             int port = 8000,
             string hostname = "localhost",
             LogLevel logLevel = LogLevel.Debug,
-            int LRUCacheSize = 64
+            int LFUCacheSize = 128
         ) {
-            Init(port, new string[]{ hostname }, logLevel, LRUCacheSize);
+            Init(port, new string[]{ hostname }, logLevel, LFUCacheSize);
         }
         
         /// <summary>Creates a new <see cref="Server"/> with the provided parameters.</summary>
@@ -87,9 +87,9 @@ namespace Asypi {
             int port,
             string[] hostnames,
             LogLevel logLevel = LogLevel.Debug,
-            int LRUCacheSize = 64
+            int LFUCacheSize = 128
         ) {
-            Init(port, hostnames, logLevel, LRUCacheSize);
+            Init(port, hostnames, logLevel, LFUCacheSize);
         }
         
         
@@ -97,7 +97,7 @@ namespace Asypi {
         /// Internal initializer of the <see cref="Server"/>.
         /// Allows multiple user-facing constructors without reusing code.
         /// </summary>
-        void Init(int port, IEnumerable hosts, LogLevel logLevel, int LRUCacheSize) {
+        void Init(int port, IEnumerable hosts, LogLevel logLevel, int LFUCacheSize) {
             // Check if another server has already been created
             if (ServerGuard.ServerExists) {
                 Log.Fatal(
@@ -115,7 +115,7 @@ namespace Asypi {
             this.Port = port;
             this.Hosts = hosts;
             this.LogLevel = logLevel;
-            this.LRUCacheSize = LRUCacheSize;
+            this.LFUCacheSize = LFUCacheSize;
             
             
             // Initialize logger
@@ -143,19 +143,19 @@ namespace Asypi {
             
             
             // Bounds checking
-            if (this.LRUCacheSize < 1) {
-                Log.Fatal("[Asypi] Attempted to set LRU cache size to a number less than 1");
-                throw new Exception("Received invalid LRU cache size");
-            } else if (this.LRUCacheSize > 128) {
+            if (this.LFUCacheSize < 1) {
+                Log.Fatal("[Asypi] Attempted to set LFU cache size to a number less than 1");
+                throw new Exception("Received invalid LFU cache size");
+            } else if (this.LFUCacheSize > 1024) {
                 Log.Warning(
-                    "[Asypi] Setting LRU cache size to {0}; ensure system has sufficient memory",
-                    this.LRUCacheSize
+                    "[Asypi] Setting LFU cache size to {0} MiB; ensure system has sufficient memory",
+                    this.LFUCacheSize
                 );
             }
             
             
-            // Initialize LRU cache
-            Params.FileServerLRUCacheSize = LRUCacheSize;
+            // Initialize LFU cache
+            Params.FileServerLFUCacheSize = LFUCacheSize;
             FileServer.Init();
             
             // Initialize router

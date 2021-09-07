@@ -31,6 +31,8 @@ namespace Asypi {
                         return "text/javascript";
                     case ".json":
                         return "application/json";
+                    case ".mov":
+                        return "video/quicktime";
                     case ".mp3":
                         return "audio/mpeg";
                     case ".mp4":

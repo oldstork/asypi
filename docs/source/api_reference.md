@@ -26,9 +26,9 @@ The `LogLevel` that the `Server` initialized the logger with.
 
 ---
 
-#### `int LRUCacheSize`
+#### `int LFUCacheSize`
 
-The LRU cache size that the `Server` initialized `FileServer` with.
+The LFU cache size that the `Server` initialized `FileServer` with.
 
 ---
 
@@ -38,9 +38,9 @@ The `Responder` that the `Server` will route requests to when no other valid rou
 
 ### Constructors
 
-`public Server(int port = 8000, string hostname = "localhost", LogLevel logLevel = LogLevel.Debug, int LRUCacheSize = 64)`
+`public Server(int port = 8000, string hostname = "localhost", LogLevel logLevel = LogLevel.Debug, int LFUCacheSize = 64)`
 
-`public Server(int port, string[] hostnames, LogLevel logLevel = LogLevel.Debug, int LRUCacheSize = 64)`
+`public Server(int port, string[] hostnames, LogLevel logLevel = LogLevel.Debug, int LFUCacheSize = 64)`
 
 ### Routing Methods
 
@@ -251,14 +251,14 @@ The internal instance of `DefaultServerHeaders`.
 
 ## **FileServer**
 
-`FileServer` is a static class provided by Asypi. It utilizes an LRU cache, which is set up when `Server` is initialized.
+`FileServer` is a static class provided by Asypi. It utilizes an LFU cache, which is set up when `Server` is initialized.
 
 ### Public Methods
 
 #### `byte[] Get(string filePath)`
 
-Gets the content of the file at `filePath` as a byte[], and then updates the LRU cache.
+Gets the content of the file at `filePath` as a byte[], and then updates the LFU cache.
 
 ### `byte[] Read(string filePath)`
 
-Gets the content of the file at `filePath` as a byte[], but does NOT update the LRU cache.
+Gets the content of the file at `filePath` as a byte[], but does NOT update the LFU cache.
