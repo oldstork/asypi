@@ -22,6 +22,8 @@ namespace AsypiTests {
             // Ensure server is fully initialized
             Thread.Sleep(50);
             
+            TestRunner.RunTest("Server Reset", ServerTests.Reset);
+            
             TestRunner.RunTest("Root Route Positive", RoutingTests.RootRoutePositive);
             TestRunner.RunTest("Root Route Negative", RoutingTests.RootRouteNegative);
             TestRunner.RunTest("Dynamic Route Positive", RoutingTests.DynamicRoutePositive);

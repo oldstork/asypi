@@ -82,6 +82,16 @@ namespace Asypi {
         }
         
         /// <summary>
+        /// Resets LFU cache files and frequency counters.
+        /// </summary>
+        public static void Reset() {
+            lock (lck) {
+                contentByFile.Clear();
+                frequencyByFile.Clear();
+            }
+        }
+        
+        /// <summary>
         /// Sorts frequencyByFile.
         /// DOES NOT ACQUIRE A LOCK. YOU MUST ACQUIRE A LOCK IN THE CALLER
         /// OF THIS FUNCTION.

@@ -165,11 +165,12 @@ namespace Asypi {
             router = new Router();
         }
         
-        /// <summary>Resets the server</summary>
+        /// <summary>Resets the server, including the associated <see cref="Router" /> and the <see cref="FileServer" />.</summary>
         public void Reset() {
             Log.Warning("[Asypi] Resetting server");
             
             router.Reset();
+            FileServer.Reset();
         }
         
         /// <summary>
