@@ -4,19 +4,19 @@ using System.Text.RegularExpressions;
 namespace Asypi {
     /// <summary>A utility class for validating things.</summary>
     static class Validation {
-        const string PATH_REGEX_EXPRESSION = "(?<=:.*:.*/).*";
+        const string PATH_REGEX_EXPRESSION = @"(?<=:.*:.*/).*";
         /// <summary>Grabs the requested resource path from a URL, if possible.</summary>
         public static Regex PathRegex { get; private set; }
         
-        const string FILE_EXTENSION_REGEX = "\\.[0-9a-z]+$";
+        const string FILE_EXTENSION_REGEX = @"\.[0-9a-z]+$";
         /// <summary>Grabs a file extension from a path, if one exists.</summary>
         public static Regex FileExtensionRegex { get; private set; }
         
-        const string HOSTNAME_REGEX = "^[a-zA-Z0-9-_.*]*$";
+        const string HOSTNAME_REGEX = @"^[a-zA-Z0-9\-_.*]*$";
         /// <summary>Matches if and only if input text is a valid hostname.</summary>
         public static Regex HostnameRegex { get; private set; }
         
-        const string SUBPATH_REGEX = "^[a-zA-Z0-9.-_{}]*$";
+        const string SUBPATH_REGEX = @"^[a-zA-Z0-9.\-_{}]*$";
         /// <summary>Matches if and only if input text is a valid subpath.</summary>
         public static Regex SubPathRegex { get; private set; }
         
