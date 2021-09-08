@@ -42,7 +42,7 @@ Server server = new Server(8000, "localhost");
 server.Route(
     HttpMethod.Get,
     "/",
-    (HttpRequest req, HttpResponse res, List<string> args) => {
+    (HttpRequest req, HttpResponse res) => {
         byte[] content = FileServer.Get("content.txt");
         string decodedContent = Encoding.UTF8.GetString(content);
         // do something
