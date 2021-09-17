@@ -34,18 +34,16 @@ namespace Asypi {
     public static class FileServer {
         // LFU cache
         
+        /*
+        TO PREVENT DEADLOCKS:
+        in all cases that frequencyLock and contentLock are locked at the same time
+        lock frequencyLock FIRST, and contentLock SECOND
+        */
         static object contentLock = new object();
         static object frequencyLock = new object();
-        static object updateLock = new object();
         
         static Dictionary<string, byte[]> contentByFile = new Dictionary<string, byte[]>();
         static List<FFPair> frequencyByFile = new List<FFPair>();
-        
-        static bool currentlyUpdating = false;
-        static int updateDebounce = 0;
-        
-        // update cache every 16th request
-        static int UPDATE_DEBOUNCE = 16;
         
         static long MAX_CACHE_SIZE_IN_BYTES;
         static long MAX_FILE_SIZE_IN_BYTES;
@@ -60,7 +58,7 @@ namespace Asypi {
             // service worker
             Task.Run(async () => {
                 while (true) {
-                    await Task.Delay(Params.FILESERVER_EPOCH_LENGTH);
+                    await Task.Delay(Params.FileServerEpochLength);
                     
                     lock (frequencyLock) {
                         // end of epoch, halve each frequency so that values
@@ -71,17 +69,20 @@ namespace Asypi {
                         }
                     }
                     
+                    // then update cache
+                    
                     await UpdateCache();
                 }
             });
+            
         }
         
         /// <summary>
         /// Resets LFU cache files and frequency counters.
         /// </summary>
         public static void Reset() {
-            lock (contentLock) {
-                lock (frequencyLock) {
+            lock (frequencyLock) {
+                lock (contentLock) {
                     contentByFile.Clear();
                     frequencyByFile.Clear();
                 }
@@ -102,7 +103,7 @@ namespace Asypi {
         /// DOES NOT ACQUIRE A LOCK. YOU MUST ACQUIRE A LOCK IN THE CALLER
         /// OF THIS FUNCTION.
         /// </summary>
-        static void IncrementFrequency(string filePath) {
+        static void IncrementFrequencyNolock(string filePath) {
             bool found = false;
             
             foreach (FFPair pair in frequencyByFile) {
@@ -123,106 +124,93 @@ namespace Asypi {
         }
         
         /// <summary>
-        /// Update the LFU cache after a new request for a file.
+        /// Acquires relevant locks and
+        /// increments frequency of a file in the LFU system.
+        /// For async, see
+        /// <see cref="IncrementFrequencyAsync" />.
+        /// </summary>
+        static void IncrementFrequency(string filePath) {
+            lock (frequencyLock) {
+                IncrementFrequencyNolock(filePath);
+            }
+        }
+        
+        /// <summary>
+        /// Acquires relevant locks and
+        /// increments frequency of a file in the LFU system.
+        /// For sync, see
+        /// <see cref="IncrementFrequency" />.
+        /// </summary>
+        static Task IncrementFrequencyAsync(string filePath) {
+            return Task.Run(() => {
+                IncrementFrequency(filePath);
+            });
+        }
+        
+        /// <summary>
+        /// Update the LFU cache.
         /// Does not remove files until over size limit.
         /// </summary>
-        static Task UpdateCache(string filePath = null, byte[] value = null) {
+        static Task UpdateCache() {
             return Task.Run(() => {
-                lock (updateLock) {
-                    // we don't actually need to update every request
-                    // to keep the LFU cache accurate, so don't
-                    // update every request
-                    
-                    if (currentlyUpdating) {
-                        return;
-                    } else if (updateDebounce > 0) {
-                        updateDebounce -= 1;
-                        return;
-                    } else {
-                        currentlyUpdating = true;
-                        updateDebounce = UPDATE_DEBOUNCE;
-                    }
-                }
+                long bytesUsed = 0;
+                HashSet<string> pathsToKeep = new HashSet<string>();
+                bool exhausted = false;
                 
-                try {
-                    long bytesUsed = 0;
-                    HashSet<string> pathsToKeep = new HashSet<string>();
-                    bool exhausted = false;
+                lock (frequencyLock) {
+                    // update frequency if a specific file is provided
                     
-                    lock (frequencyLock) {
-                        // update frequency if a specific file is provided
-                        if (filePath != null) {
-                            IncrementFrequency(filePath);
+                    lock (contentLock) {
+                        // go through the sorted list, starting at
+                        // highest frequency
+                        for (int i = 0; i < frequencyByFile.Count; i++) {
+                            FFPair pair = frequencyByFile[i];
+                            string path = pair.FilePath;
+                            byte[] content;
+                            
+                            if (!contentByFile.ContainsKey(path)) {
+                                // if we don't already know the contents of the file
+                                content = Read(path);
+                            } else {
+                                content = contentByFile[path];
+                            }
+                            
+                            // dont cache things that are over 50% of max cache size
+                            if (content.Length > MAX_FILE_SIZE_IN_BYTES) {
+                                continue;
+                            }
+                            
+                            // if we would be over the maximum cache size after adding this file
+                            if (bytesUsed + content.Length > MAX_CACHE_SIZE_IN_BYTES) {
+                                // then we need to stop adding files and maybe remove some
+                                // existing ones
+                                exhausted = true;
+                                break;
+                            } else {
+                                // if we would not be over the maximum cache size
+                                
+                                bytesUsed += content.Length;
+                                if (!contentByFile.ContainsKey(path)) contentByFile[path] = content;
+                                pathsToKeep.Add(path);
+                            }
                         }
                         
-                        lock (contentLock) {
-                            // go through the sorted list, starting at
-                            // highest frequency
-                            for (int i = 0; i < frequencyByFile.Count; i++) {
-                                FFPair pair = frequencyByFile[i];
-                                string path = pair.FilePath;
-                                byte[] content;
-                                
-                                // dont waste a read if we already know the value
-                                if (!contentByFile.ContainsKey(path)) {
-                                    // dont waste a read if the file-value pair was provided
-                                    if (path == filePath) {
-                                        content = value;
-                                    } else {
-                                        // otherwise we have to read anyway
-                                        content = Read(path);
-                                    }
-                                } else {
-                                    content = contentByFile[path];
-                                }
-                                
-                                // dont cache things that are over 50% of max cache size
-                                if (content.Length > MAX_FILE_SIZE_IN_BYTES) {
-                                    continue;
-                                }
-                                
-                                // if we would be over the maximum cache size after adding this file
-                                if (bytesUsed + content.Length > MAX_CACHE_SIZE_IN_BYTES) {
-                                    // then we need to stop adding files and maybe remove some
-                                    // existing ones
-                                    exhausted = true;
-                                    break;
-                                } else {
-                                    // if we would not be over the maximum cache size
-                                    
-                                    bytesUsed += content.Length;
-                                    if (!contentByFile.ContainsKey(path)) contentByFile[path] = content;
-                                    pathsToKeep.Add(path);
+                        // if we are exhausted, then we have to remove some stuff
+                        if (exhausted) {
+                            List<string> pathsToRemove = new List<string>();
+                            
+                            // if its not in paths to keep, queue it for removal
+                            foreach (string path in contentByFile.Keys) {
+                                if (!pathsToKeep.Contains(path)) {
+                                    pathsToRemove.Add(path);
                                 }
                             }
                             
-                            // if we are exhausted, then we have to remove some stuff
-                            if (exhausted) {
-                                List<string> pathsToRemove = new List<string>();
-                                
-                                // if its not in paths to keep, queue it for removal
-                                foreach (string path in contentByFile.Keys) {
-                                    if (!pathsToKeep.Contains(path)) {
-                                        pathsToRemove.Add(path);
-                                    }
-                                }
-                                
-                                // remove everything queued for removal
-                                foreach (string path in pathsToRemove) {
-                                    contentByFile.Remove(path);
-                                }
+                            // remove everything queued for removal
+                            foreach (string path in pathsToRemove) {
+                                contentByFile.Remove(path);
                             }
                         }
-                    }
-                    
-                    lock (updateLock) {
-                        currentlyUpdating = false;
-                    }
-                } catch (Exception) {
-                    // in the event of an exception, we NEED to set currentlyUpdating to false
-                    // so that future requests will work
-                    lock (updateLock) {
-                        currentlyUpdating = false;
                     }
                 }
                 
@@ -254,20 +242,19 @@ namespace Asypi {
                     try {
                         byte[] content = File.ReadAllBytes(filePath);
                         
-                        // this can acquire the lock later because its async
-                        UpdateCache(filePath, content);
+                        // update LFU frequency
+                        IncrementFrequencyAsync(filePath);
                         
-                        // we have no guarantee that calling cache will actually cache it, since
-                        // this is an LFU system
                         return content;
                     } catch (FileNotFoundException) {
                         Log.Error("[Asypi] FileServer.Get() File not found: {0}", filePath);
                         return null;
                     }
                 } else {
-                    // if we did find file in cache, re-cache it to update LFU frequency
-                    // this can acquire the lock later because its async
-                    UpdateCache(filePath, contentByFile[filePath]);
+                    // if we did find file in cache
+                    
+                    // update LFU frequency
+                    IncrementFrequencyAsync(filePath);
                     
                     return contentByFile[filePath];
                 }

@@ -61,6 +61,12 @@ namespace Asypi {
         /// </summary>
         public int LFUCacheSize { get; private set; }
         
+        /// <summary>
+        /// The epoch length, in milliseconds, that the <see cref="Server"/>
+        /// initialized <c>FileServer</c> with.
+        /// </summary>
+        public int FileServerEpochLength { get; private set; }
+        
         
         /// <summary>
         /// The <c>Responder</c> that the <see cref="Server"/>
@@ -72,24 +78,34 @@ namespace Asypi {
         Router router;
         
         
-        /// <summary>Creates a new <see cref="Server"/> with the provided parameters.</summary>
+        /// <summary>
+        /// Creates a new <see cref="Server"/> with the provided parameters.
+        /// If provided <c>null</c>, the following parameters will be set to default values:
+        /// <c>LFUCacheSize</c>, <c>fileServerEpochLength</c>
+        /// </summary>
         public Server(
             int port = 8000,
             string hostname = "localhost",
             LogLevel logLevel = LogLevel.Debug,
-            int LFUCacheSize = 128
+            int? LFUCacheSize = null,
+            int? fileServerEpochLength = null
         ) {
-            Init(port, new string[]{ hostname }, logLevel, LFUCacheSize);
+            Init(port, new string[]{ hostname }, logLevel, LFUCacheSize, fileServerEpochLength);
         }
         
-        /// <summary>Creates a new <see cref="Server"/> with the provided parameters.</summary>
+        /// <summary>
+        /// Creates a new <see cref="Server"/> with the provided parameters.
+        /// If provided <c>null</c>, the following parameters will be set to default values:
+        /// <c>LFUCacheSize</c>, <c>fileServerEpochLength</c>
+        /// </summary>
         public Server(
             int port,
             string[] hostnames,
             LogLevel logLevel = LogLevel.Debug,
-            int LFUCacheSize = 128
+            int? LFUCacheSize = null,
+            int? fileServerEpochLength = null
         ) {
-            Init(port, hostnames, logLevel, LFUCacheSize);
+            Init(port, hostnames, logLevel, LFUCacheSize, fileServerEpochLength);
         }
         
         
@@ -97,7 +113,7 @@ namespace Asypi {
         /// Internal initializer of the <see cref="Server"/>.
         /// Allows multiple user-facing constructors without reusing code.
         /// </summary>
-        void Init(int port, IEnumerable hosts, LogLevel logLevel, int LFUCacheSize) {
+        void Init(int port, IEnumerable hosts, LogLevel logLevel, int? LFUCacheSize, int? fileServerEpochLength) {
             // Check if another server has already been created
             if (ServerGuard.ServerExists) {
                 Log.Fatal(
@@ -115,7 +131,18 @@ namespace Asypi {
             this.Port = port;
             this.Hosts = hosts;
             this.LogLevel = logLevel;
-            this.LFUCacheSize = LFUCacheSize;
+            
+            if (LFUCacheSize != null) {
+                this.LFUCacheSize = LFUCacheSize.Value;
+            } else {
+                this.LFUCacheSize = Params.FileServerLFUCacheSize;
+            }
+            
+            if (fileServerEpochLength != null) {
+                this.FileServerEpochLength = fileServerEpochLength.Value;
+            } else {
+                this.FileServerEpochLength = Params.FileServerEpochLength;
+            }
             
             
             // Initialize logger
@@ -155,7 +182,8 @@ namespace Asypi {
             
             
             // Initialize LFU cache
-            Params.FileServerLFUCacheSize = LFUCacheSize;
+            Params.FileServerLFUCacheSize = this.LFUCacheSize;
+            Params.FileServerEpochLength = this.FileServerEpochLength;
             FileServer.Init();
             
             // Initialize router
