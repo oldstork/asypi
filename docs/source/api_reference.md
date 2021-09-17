@@ -32,15 +32,39 @@ The LFU cache size that the `Server` initialized `FileServer` with.
 
 ---
 
+#### `int FileServerEpochLength`
+
+The epoch length, in milliseconds, that the `Server` initialized `FileServer` with.
+
+---
+
 #### `Responder Responder404`
 
 The `Responder` that the `Server` will route requests to when no other valid routes were found.
 
 ### Constructors
 
-`public Server(int port = 8000, string hostname = "localhost", LogLevel logLevel = LogLevel.Debug, int LFUCacheSize = 64)`
+```C#
+public Server(
+    int port = 8000,
+    string hostname = "localhost",
+    LogLevel logLevel = LogLevel.Debug,
+    int? LFUCacheSize = null,
+    int? fileServerEpochLength = null
+)
+```
 
-`public Server(int port, string[] hostnames, LogLevel logLevel = LogLevel.Debug, int LFUCacheSize = 64)`
+```C#
+public Server(
+    int port,
+    string[] hostnames,
+    LogLevel logLevel = LogLevel.Debug,
+    int? LFUCacheSize = null,
+    int? fileServerEpochLength = null
+)
+```
+
+If given as null, `LFUCacheSize` and `fileServerEpochLength` will be set to default values under the hood.
 
 ### Routing Methods
 

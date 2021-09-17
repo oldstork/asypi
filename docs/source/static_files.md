@@ -32,7 +32,7 @@ server.Run();
 
 FileServer allows quick, easy, and cached access to files on disk. `Server.RouteStaticFile()` and `Server.RouteStaticDir()` both utilize `FileServer` under the hood.
 
-`FileServer` caches files under an LFU system. The maximum size of the cache can be configured when creating a `Server`. Note that `FileServer` will *not* cache files larger than 50% of the maximum cache size.
+`FileServer` caches files under an LFU system. The maximum size of the cache and the interval between cache updates can be configured when creating a `Server`. Note that `FileServer` will *not* cache files larger than 50% of the maximum cache size.
 
 ```C#
 using Asypi;
