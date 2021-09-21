@@ -28,7 +28,7 @@ The `LogLevel` that the `Server` initialized the logger with.
 
 #### `int LFUCacheSize`
 
-The LFU cache size that the `Server` initialized `FileServer` with.
+The LFU cache size, in MiB, that the `Server` initialized `FileServer` with.
 
 ---
 
@@ -63,6 +63,8 @@ public Server(
     int? fileServerEpochLength = null
 )
 ```
+
+Note that `LFUCacheSize` is measured in MiB, and `fileServerEpochLength` is measured in milliseconds.
 
 If given as null, `LFUCacheSize` and `fileServerEpochLength` will be set to default values under the hood.
 

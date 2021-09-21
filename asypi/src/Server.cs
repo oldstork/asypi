@@ -80,9 +80,15 @@ namespace Asypi {
         
         /// <summary>
         /// Creates a new <see cref="Server"/> with the provided parameters.
+        /// <c>LFUCacheSize</c> is measured in MiB, and <c>fileServerEpochLength</c> is measured in milliseconds.
+        /// <br />
         /// If provided <c>null</c>, the following parameters will be set to default values:
         /// <c>LFUCacheSize</c>, <c>fileServerEpochLength</c>
         /// </summary>
+        protected void ConstructorDoc() {}
+        
+        
+        /// <inheritdoc cref="ConstructorDoc" />
         public Server(
             int port = 8000,
             string hostname = "localhost",
@@ -93,11 +99,7 @@ namespace Asypi {
             Init(port, new string[]{ hostname }, logLevel, LFUCacheSize, fileServerEpochLength);
         }
         
-        /// <summary>
-        /// Creates a new <see cref="Server"/> with the provided parameters.
-        /// If provided <c>null</c>, the following parameters will be set to default values:
-        /// <c>LFUCacheSize</c>, <c>fileServerEpochLength</c>
-        /// </summary>
+        /// <inheritdoc cref="ConstructorDoc" />
         public Server(
             int port,
             string[] hostnames,
@@ -210,7 +212,7 @@ namespace Asypi {
         /// For example, <c>/users/{id}</c> would match <c>/users/1</c>, <c>/users/joe</c>, etc.,
         /// and the responder would receive argument lists <c>["1"]</c> and <c>["joe"]</c> respectively.
         /// </summary>
-        void PathsDoc() {}
+        protected void PathsDoc() {}
         
         /// <summary>
         /// Routes requests to <c>path</c> of method <c>method</c> to <c>responder</c>.
@@ -228,7 +230,7 @@ namespace Asypi {
         /// If no headers are provided, will use default headers.
         /// <inheritdoc cref="Server.PathsDoc" />
         /// </summary>
-        void TransformedResponderRouteDoc() {}
+        protected void TransformedResponderRouteDoc() {}
         
         /// <inheritdoc cref="Server.TransformedResponderRouteDoc" />
         public void Route(
@@ -254,7 +256,7 @@ namespace Asypi {
         
         
         /// <summary>Note that <see cref="DefaultHeaders"/> contains <c>X-Content-Type-Options: nosniff</c>.</summary>
-        void DefaultHeadersNoteDoc() {}
+        protected void DefaultHeadersNoteDoc() {}
         
         /// <summary>
         /// Routes requests to <c>path</c> to the file at <c>filePath</c>.

@@ -52,7 +52,7 @@ server.Run();
 - **Well-Tested.** Do not use Asypi for mission-critical or security-critical applications.
 - Suitable for production usage unless if you *really* know what you're doing.
 
-Hopefully, as the project progresses, the these caveats can be removed.
+Hopefully, as the project progresses, these caveats can be removed.
 
 ## Contributing
 

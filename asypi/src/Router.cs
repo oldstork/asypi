@@ -156,7 +156,7 @@ namespace Asypi {
         /// Create a new route with the given parameters.
         /// If headers is null, will use default headers.
         /// </summary>
-        void RouteDoc() {}
+        protected void RouteDoc() {}
         
         
         /// <inheritdoc cref="RouteDoc" />
