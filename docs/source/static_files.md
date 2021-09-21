@@ -22,7 +22,7 @@ using Asypi;
 
 Server server = new Server(8000, "localhost");
 
-// Serve files under ./static at /staticfiles
+// Serve files from ./static at /staticfiles
 server.RouteStaticDir("/staticfiles", "./static");
 
 server.Run();
