@@ -78,6 +78,12 @@ namespace Asypi {
         Router router;
         
         
+        /// <summary>Returns the current version of Asypi as a string.</summary>
+        public static string AsypiVersion() {
+            return Params.ASYPI_VERSION;
+        }
+        
+        
         /// <summary>
         /// Creates a new <see cref="Server"/> with the provided parameters.
         /// <c>LFUCacheSize</c> is measured in MiB, and <c>fileServerEpochLength</c> is measured in milliseconds.

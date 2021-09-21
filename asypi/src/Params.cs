@@ -3,7 +3,10 @@ namespace Asypi {
     
     /// <summary>A utility class for global parameters.</summary>
     static class Params {
-        /// <summary>The number of bytes in a MiB</summary>
+        /// <summary>The current version string.</summary>
+        public const string ASYPI_VERSION = "0.0.8";
+        
+        /// <summary>The number of bytes in a MiB.</summary>
         public const int BYTES_PER_MIB = 1024 * 1024;
         
         /// <summary>The maximum number of delimited "things" in a request path.</summary>
