@@ -11,7 +11,7 @@ Middleware has the power to "break" the response chain, preventing successive mi
 In Asypi, middleware is simply a function with the following signature:
 
 ```C#
-(HttpRequest req, HttpResponse res) => {
+(Req req, Res res) => {
     // do something
     return shouldContinue;
 }
@@ -27,7 +27,7 @@ Middleware can be used with a simple call to `Server.Use()`. For example, to reg
 
 ```C#
 // on all routes that start with private/
-server.use(@"private\/.*", (HttpRequest req, HttpResponse res) => {
+server.use(@"private\/.*", (Req req, Res res) => {
     // don't load the page if user is not authenticated
     if (isAuthenticated(req)) {
         return true;

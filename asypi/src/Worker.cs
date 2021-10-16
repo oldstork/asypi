@@ -51,8 +51,8 @@ namespace Asypi {
                 HttpListenerResponse httpResponse = context.Response;
                 
                 // create user facing req and res objects
-                HttpRequest req = new HttpRequest(httpRequest);
-                HttpResponse res = new HttpResponse(httpResponse);
+                Req req = new Req(httpRequest);
+                Res res = new Res(httpResponse);
                 
                 // try to route the request
                 try {

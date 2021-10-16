@@ -272,7 +272,7 @@ namespace Asypi {
         /// <inheritdoc cref="Server.DefaultHeadersNoteDoc" />
         /// </summary>
         public void RouteStaticFile(string path, string filePath, string contentType = null) {
-            router.Route(HttpMethod.Get, path, (HttpRequest req, HttpResponse res) => {
+            router.Route(HttpMethod.Get, path, (Req req, Res res) => {
                 byte[] bytes = FileServer.Get(filePath);
                 
                 if (bytes == null) {

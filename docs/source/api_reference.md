@@ -143,8 +143,8 @@ Under the hood, all requests in Asypi are handled by a responder with the follow
 
 ```C#
 public delegate void Responder(
-    HttpRequest request,
-    HttpResponse response
+    Req request,
+    Res response
 );
 ```
 
@@ -152,10 +152,10 @@ However, for convenience, simplified responders are also generally accepted. The
 
 ```C#
 public delegate string SimpleTextResponder();
-public delegate string ComplexTextResponder(HttpRequest req, HttpResponse res);
+public delegate string ComplexTextResponder(Req req, Res res);
 ```
 
-Under the hood, each of these are wrapped by a `Responder` that sets the body of the `HttpResponse` to the string output of the simplified responder, sets content type to a separately provided value, and sets headers.
+Under the hood, each of these are wrapped by a `Responder` that sets the body of the `Res` to the string output of the simplified responder, sets content type to a separately provided value, and sets headers.
 
 <br />
 <br />
@@ -182,9 +182,9 @@ Asypi also contains a few convenience items for working with `HttpMethod`s:
 <br />
 <br />
 
-## **HttpRequest**
+## **Req**
 
-`HttpRequest` is a wrapper over `System.Net.HttpListenerRequest`, exposing relevant fields.
+`Req` is a wrapper over `System.Net.HttpListenerRequest`, exposing relevant fields.
 
 ### Public Fields
 
@@ -202,18 +202,18 @@ Gets the body of the request, as a `byte[]`.
 
 The values of applicable variable parameters.
 
-For example, if a route was registered with the path `/{name}`, and a user requested `/joe`, the args in the resulting HttpRequest will contain `["joe"]`.
+For example, if a route was registered with the path `/{name}`, and a user requested `/joe`, the args in the resulting `Req` will contain `["joe"]`.
 
 ### Other Public Fields
 
-The majority of the fields in `System.Net.HttpListenerRequest` are directly wrapped by `HttpRequest`. For more information on these fields, refer to [Microsoft's official documentation](https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistenerrequest?view=net-5.0).
+The majority of the fields in `System.Net.HttpListenerRequest` are directly wrapped by `Req`. For more information on these fields, refer to [Microsoft's official documentation](https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistenerrequest?view=net-5.0).
 
 <br />
 <br />
 
-## **HttpResponse**
+## **Res**
 
-`HttpResponse` is a wrapper over `System.Net.HttpListenerResponse`, exposing relevant fields.
+`Res` is a wrapper over `System.Net.HttpListenerResponse`, exposing relevant fields.
 
 ### Public Fields
 
@@ -229,7 +229,7 @@ Sets the body of the response, as a `byte[]`.
 
 ### Other Public Fields
 
-The majority of the fields in `System.Net.HttpListenerResponse` are directly wrapped by `HttpResponse`. For more information on these fields, refer to [Microsoft's official documentation](https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistenerresponse?view=net-5.0).
+The majority of the fields in `System.Net.HttpListenerResponse` are directly wrapped by `Res`. For more information on these fields, refer to [Microsoft's official documentation](https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistenerresponse?view=net-5.0).
 
 <br />
 <br />

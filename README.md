@@ -4,7 +4,7 @@
 
 A simple, asynchronous, and scalable HTTP server built on `System.Net.HttpListener`. Pronounced "AS-eh-PIE."
 
-[Docs](https://asypi.readthedocs.io/en/latest/)
+[Docs](https://asypi.readthedocs.io/en/latest/introduction.html)
 
 [nuget](https://www.nuget.org/packages/Asypi/)
 

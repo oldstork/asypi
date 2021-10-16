@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 
 namespace Asypi {
-    /// <summary>A utility class for adding headers to an <see cref="HttpResponse"/></summary>
+    /// <summary>A utility class for adding headers to an <see cref="Res"/></summary>
     public interface IHeaders {
         /// <summary>A dictionary containing header values, indexed by header name.</summary>
         Dictionary<string, string> Values { get; }

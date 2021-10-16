@@ -62,7 +62,7 @@ namespace Asypi {
     }
     
     /// <summary>A wrapper over <see cref="HttpListenerRequest"/>. Includes important information about an HTTP request.</summary>
-    public class HttpRequest {
+    public class Req {
         // the wrapped HttpListenerRequest
         HttpListenerRequest inner;
         
@@ -154,7 +154,7 @@ namespace Asypi {
         /// <br />
         /// For example, if a route was registered with the path <c>/{name}</c>,
         /// and a user requested <c>/joe</c>, the args in the resulting
-        /// <see cref="HttpRequest" /> will contain <c>["joe"].</c>
+        /// <see cref="Req" /> will contain <c>["joe"].</c>
         /// </summary>
         public List<string> Args { get; set; }
         
@@ -187,8 +187,8 @@ namespace Asypi {
             }
         }
         
-        /// <summary>Creates a new <see cref="HttpRequest"/> wrapping the provided <see cref="HttpListenerRequest"/>.</summary>
-        public HttpRequest(HttpListenerRequest request) {
+        /// <summary>Creates a new <see cref="Req"/> wrapping the provided <see cref="HttpListenerRequest"/>.</summary>
+        public Req(HttpListenerRequest request) {
             inner = request;
             
             // ensure we have no uninitialized access attempt bugs
@@ -198,7 +198,7 @@ namespace Asypi {
     
     
     /// <summary>A wrapper over <see cref="HttpListenerResponse"/>. Allows reading and setting important fields of an HTTP response.</summary>
-    public class HttpResponse {
+    public class Res {
         // the wrapped HttpListenerResponse
         HttpListenerResponse inner;
         
@@ -267,7 +267,7 @@ namespace Asypi {
         /// The body text that will be sent with the response.
         /// <br />
         /// Due to quirks related to <see cref="HttpListenerResponse.OutputStream"/>,
-        /// this value should only be set once per <see cref="HttpResponse"/>.
+        /// this value should only be set once per <see cref="Res"/>.
         /// Attempting to set it multiple times will result in no changes and
         /// a logged warning.
         /// </summary>
@@ -307,8 +307,8 @@ namespace Asypi {
             }
         }
         
-        /// <summary>Creates a new <see cref="HttpResponse"/> wrapping the provided <see cref="HttpListenerResponse"/>.</summary>
-        public HttpResponse(HttpListenerResponse response) {
+        /// <summary>Creates a new <see cref="Res"/> wrapping the provided <see cref="HttpListenerResponse"/>.</summary>
+        public Res(HttpListenerResponse response) {
             inner = response;
         }
         

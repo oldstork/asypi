@@ -5,8 +5,8 @@ using System.Net;
 namespace Asypi {
     /// <summary>Responds to HTTP requests.</summary>
     public delegate void Responder(
-        HttpRequest req,
-        HttpResponse res
+        Req req,
+        Res res
     );
     
     /// <summary>
@@ -21,7 +21,7 @@ namespace Asypi {
     public delegate string SimpleTextResponder();
     
     /// <inheritdoc cref="TransformedResponderDoc"/>
-    public delegate string ComplexTextResponder(HttpRequest req, HttpResponse res);
+    public delegate string ComplexTextResponder(Req req, Res res);
     
     /// <summary>A set of utilities for working with and transforming things into <see cref="Responder"/>s.</summary>
     static class ResponderUtils {
@@ -30,8 +30,8 @@ namespace Asypi {
         /// writes the provided data to the response.
         /// </summary>
         public static void SimpleResponse(
-            HttpRequest req,
-            HttpResponse res,
+            Req req,
+            Res res,
             string responseText,
             string contentType,
             IHeaders headers
@@ -59,7 +59,7 @@ namespace Asypi {
             string contentType,
             IHeaders headers
         ) {
-            return (HttpRequest req, HttpResponse res) => {
+            return (Req req, Res res) => {
                 string responseText = simpleTextResponder();
                 
                 SimpleResponse(req, res, responseText, contentType, headers);
@@ -72,7 +72,7 @@ namespace Asypi {
             string contentType,
             IHeaders headers
         ) {
-            return (HttpRequest req, HttpResponse res) => {
+            return (Req req, Res res) => {
                 string responseText = complexTextResponder(req, res);
                 
                 SimpleResponse(req, res, responseText, contentType, headers);
@@ -86,7 +86,7 @@ namespace Asypi {
         }, "text/html", null);
         
         /// <summary>A sensible default 404 <see cref="Responder"/>.</summary>
-        public static void Respond404(HttpRequest req, HttpResponse res) {
+        public static void Respond404(Req req, Res res) {
             res.StatusCode = (int) HttpStatusCode.NotFound;
             
             Respond404Text(req, res);

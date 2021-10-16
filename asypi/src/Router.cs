@@ -99,7 +99,7 @@ namespace Asypi {
         }
         
         /// <summary>Runs the associated <see cref="Responder"/> of the <see cref="Route"/> with the provided arguments.</summary>
-        public void Run(HttpRequest req, HttpResponse res) {
+        public void Run(Req req, Res res) {
             responder(req, res);
         }
     }
@@ -210,7 +210,7 @@ namespace Asypi {
         /// <br />
         /// Returns true if a path was found and run, and false otherwise.
         /// </summary>
-        public bool RunRoute(HttpMethod method, string path, HttpRequest req, HttpResponse res) {
+        public bool RunRoute(HttpMethod method, string path, Req req, Res res) {
             Route route = null;
             
             // check if path corresponds to a non-parameterized route first

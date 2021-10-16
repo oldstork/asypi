@@ -8,7 +8,7 @@ namespace AsypiTests {
             
             server.Reset();
             
-            server.Use(".*", (HttpRequest req, HttpResponse res) => {
+            server.Use(".*", (Req req, Res res) => {
                 return true;
             });
             
@@ -22,7 +22,7 @@ namespace AsypiTests {
             
             server.Reset();
             
-            server.Use(".*", (HttpRequest req, HttpResponse res) => {
+            server.Use(".*", (Req req, Res res) => {
                 return false;
             });
             
@@ -36,7 +36,7 @@ namespace AsypiTests {
             
             server.Reset();
             
-            server.Use(".*", (HttpRequest req, HttpResponse res) => {
+            server.Use(".*", (Req req, Res res) => {
                 res.BodyText = "foo";
                 return false;
             });

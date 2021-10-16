@@ -29,7 +29,7 @@ namespace AsypiTests {
             
             server.Reset();
             
-            server.Route(HttpMethod.Get, "/{name}", (HttpRequest req, HttpResponse res) => { return String.Format("Hello {0}!", req.Args[0]); }, "text/plain");
+            server.Route(HttpMethod.Get, "/{name}", (Req req, Res res) => { return String.Format("Hello {0}!", req.Args[0]); }, "text/plain");
             
             return CliLink.CurlTest("-X GET localhost:8000/joe", "^Hello joe!$");
         }
@@ -39,7 +39,7 @@ namespace AsypiTests {
             
             server.Reset();
             
-            server.Route(HttpMethod.Get, "/{one}/{two}", (HttpRequest req, HttpResponse res) => { return String.Format("{0} {1}!", req.Args[0], req.Args[1]); }, "text/plain");
+            server.Route(HttpMethod.Get, "/{one}/{two}", (Req req, Res res) => { return String.Format("{0} {1}!", req.Args[0], req.Args[1]); }, "text/plain");
             
             return CliLink.CurlTest("-X GET localhost:8000/foo/bar", "^foo bar!$");
         }
@@ -50,7 +50,7 @@ namespace AsypiTests {
             server.Reset();
             
             server.Route(HttpMethod.Get, "/foo", () => { return "foo"; }, "text/plain");
-            server.Route(HttpMethod.Get, "/{name}", (HttpRequest req, HttpResponse res) => { return String.Format("Hello {0}!", req.Args[0]); }, "text/plain");
+            server.Route(HttpMethod.Get, "/{name}", (Req req, Res res) => { return String.Format("Hello {0}!", req.Args[0]); }, "text/plain");
             
             return CliLink.CurlTest("-X GET localhost:8000/foo", "^foo$");
         }

@@ -13,5 +13,5 @@ namespace Asypi {
     /// set a redirect URL and response code and
     /// return false to prevent unauthorized user access. 
     /// </summary>
-    public delegate bool Middleware(HttpRequest req, HttpResponse res);
+    public delegate bool Middleware(Req req, Res res);
 }
