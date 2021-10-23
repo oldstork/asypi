@@ -1,6 +1,6 @@
 # Asypi Documentation
 
-[![Documentation Status](https://readthedocs.org/projects/asypi/badge/?version=latest)](https://asypi.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/asypi/badge/?version=latest)](https://asypi.readthedocs.io/en/stable/?badge=stable)
 
 Documentation is handled by [Sphinx](https://www.sphinx-doc.org/en/master/index.html) and published by [readthedocs](https://readthedocs.org/). In case of confusion, both of these have great documentation on their respective websites.
 

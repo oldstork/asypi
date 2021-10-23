@@ -1,10 +1,10 @@
 # Asypi
 
-[![Documentation Status](https://readthedocs.org/projects/asypi/badge/?version=latest)](https://asypi.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/asypi/badge/?version=latest)](https://asypi.readthedocs.io/en/stable/?badge=stable)
 
 A simple, asynchronous, and scalable HTTP server built on `System.Net.HttpListener`. Pronounced "AS-eh-PIE."
 
-[Docs](https://asypi.readthedocs.io/en/latest/introduction.html)
+[Docs](https://asypi.readthedocs.io/en/stable/introduction.html)
 
 [nuget](https://www.nuget.org/packages/Asypi/)
 
@@ -60,4 +60,4 @@ If you like this project and want to contribute, please come and do so! More inf
 
 ## Documentation
 
-Documentation for Asypi can be found on [readthedocs.io](https://asypi.readthedocs.io/en/latest/).
+Documentation for Asypi can be found on [readthedocs.io](https://asypi.readthedocs.io/en/stable/).
