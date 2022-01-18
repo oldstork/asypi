@@ -143,13 +143,13 @@ namespace Asypi {
             if (LFUCacheSize != null) {
                 this.LFUCacheSize = LFUCacheSize.Value;
             } else {
-                this.LFUCacheSize = Params.FileServerLFUCacheSize;
+                this.LFUCacheSize = Params.DEFAULT_FILESERVER_LFU_CACHE_SIZE;
             }
             
             if (fileServerEpochLength != null) {
                 this.FileServerEpochLength = fileServerEpochLength.Value;
             } else {
-                this.FileServerEpochLength = Params.FileServerEpochLength;
+                this.FileServerEpochLength = Params.DEFAULT_FILESERVER_EPOCH_LENGTH;
             }
             
             
@@ -190,9 +190,7 @@ namespace Asypi {
             
             
             // Initialize LFU cache
-            Params.FileServerLFUCacheSize = this.LFUCacheSize;
-            Params.FileServerEpochLength = this.FileServerEpochLength;
-            FileServer.Init();
+            FileServer.Init(this.FileServerEpochLength, this.LFUCacheSize);
             
             // Initialize router
             // This has to come after logger initialization

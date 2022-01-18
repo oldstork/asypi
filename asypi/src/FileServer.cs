@@ -51,14 +51,14 @@ namespace Asypi {
         static FFPairComparerReverse comparer = new FFPairComparerReverse();
         
         
-        public static void Init() {
-            MAX_CACHE_SIZE_IN_BYTES = Params.FileServerLFUCacheSize * Params.BYTES_PER_MIB;
+        public static void Init(int epochLength, int LFUCacheSize) {
+            MAX_CACHE_SIZE_IN_BYTES = LFUCacheSize * Params.BYTES_PER_MIB;
             MAX_FILE_SIZE_IN_BYTES = MAX_CACHE_SIZE_IN_BYTES / 2;
             
             // service worker
             Task.Run(async () => {
                 while (true) {
-                    await Task.Delay(Params.FileServerEpochLength);
+                    await Task.Delay(epochLength);
                     
                     lock (frequencyLock) {
                         // end of epoch, halve each frequency so that values
