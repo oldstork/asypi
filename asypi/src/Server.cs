@@ -56,6 +56,13 @@ namespace Asypi {
         public LogLevel LogLevel { get; private set; }
         
         /// <summary>
+        /// Whether the <see cref="Server"/>
+        /// should compress responses if possible.
+        /// Can be changed after Server is initialized.
+        /// </summary>
+        public bool CompressResponses { get; set; }
+        
+        /// <summary>
         /// The maximum LFU cache size, in MiB, that the <see cref="Server"/>
         /// initialized <c>FileServer</c> with.
         /// </summary>
@@ -99,10 +106,11 @@ namespace Asypi {
             int port = 8000,
             string hostname = "localhost",
             LogLevel logLevel = LogLevel.Debug,
+            bool compressResponses = true,
             int? LFUCacheSize = null,
             int? fileServerEpochLength = null
         ) {
-            Init(port, new string[]{ hostname }, logLevel, LFUCacheSize, fileServerEpochLength);
+            Init(port, new string[]{ hostname }, logLevel, compressResponses, LFUCacheSize, fileServerEpochLength);
         }
         
         /// <inheritdoc cref="ConstructorDoc" />
@@ -110,10 +118,11 @@ namespace Asypi {
             int port,
             string[] hostnames,
             LogLevel logLevel = LogLevel.Debug,
+            bool compressResponses = true,
             int? LFUCacheSize = null,
             int? fileServerEpochLength = null
         ) {
-            Init(port, hostnames, logLevel, LFUCacheSize, fileServerEpochLength);
+            Init(port, hostnames, logLevel, compressResponses, LFUCacheSize, fileServerEpochLength);
         }
         
         
@@ -121,7 +130,7 @@ namespace Asypi {
         /// Internal initializer of the <see cref="Server"/>.
         /// Allows multiple user-facing constructors without reusing code.
         /// </summary>
-        void Init(int port, IEnumerable hosts, LogLevel logLevel, int? LFUCacheSize, int? fileServerEpochLength) {
+        void Init(int port, IEnumerable hosts, LogLevel logLevel, bool compressResponses, int? LFUCacheSize, int? fileServerEpochLength) {
             // Check if another server has already been created
             if (ServerGuard.ServerExists) {
                 Log.Fatal(
@@ -139,6 +148,7 @@ namespace Asypi {
             this.Port = port;
             this.Hosts = hosts;
             this.LogLevel = logLevel;
+            this.CompressResponses = compressResponses;
             
             if (LFUCacheSize != null) {
                 this.LFUCacheSize = LFUCacheSize.Value;
@@ -271,14 +281,68 @@ namespace Asypi {
         /// </summary>
         public void RouteStaticFile(string path, string filePath, string contentType = null) {
             router.Route(HttpMethod.Get, path, (Req req, Res res) => {
-                byte[] bytes = FileServer.Get(filePath);
+                byte[] bytes;
                 
+                IHeaders headers;
+                
+                
+                if (CompressResponses) {
+                    // get Accept-Encoding value
+                    string[] acceptedEncodings = req.Headers.GetValues("Accept-Encoding");
+                    
+                    if (acceptedEncodings != null) {
+                        // check if br or gz accepted
+                        bool brAccepted = false;
+                        bool gzAccepted = false;
+                        
+                        foreach (string enc in acceptedEncodings) {
+                            if (enc == "br") {
+                                brAccepted = true;
+                            } else if (enc == "gzip") {
+                                gzAccepted = true;
+                            }
+                        }
+                        
+                        if (brAccepted && File.Exists(filePath + ".br")) {
+                            // respond with br, if possible
+                            bytes = FileServer.Get(filePath + ".br");
+                            
+                            DefaultHeadersMut newHeaders = new DefaultHeadersMut();
+                            newHeaders.Set("Content-Encoding", "br");
+                            headers = newHeaders;
+                        } else if (gzAccepted && File.Exists(filePath + ".gz")) {
+                            // then try gz
+                            bytes = FileServer.Get(filePath + ".gz");
+                            
+                            DefaultHeadersMut newHeaders = new DefaultHeadersMut();
+                            newHeaders.Set("Content-Encoding", "gzip");
+                            headers = newHeaders;
+                        } else {
+                            // if none, then just respond with file
+                            headers = DefaultServerHeaders.Instance;
+                            
+                            bytes = FileServer.Get(filePath);
+                        }
+                    } else {
+                        // if no accept-encoding header
+                        headers = DefaultServerHeaders.Instance;
+                        
+                        bytes = FileServer.Get(filePath);
+                    }
+                } else {
+                    // if not compressing
+                    headers = DefaultServerHeaders.Instance;
+                    
+                    bytes = FileServer.Get(filePath);
+                }
+                
+                // now that we have bytes and headers, send a response
                 if (bytes == null) {
                     Responder404(req, res);
                 } else {
                     res.ContentType = MimeGuesser.GuessTypeByExtension(filePath);
                     
-                    res.LoadHeaders(DefaultServerHeaders.Instance);
+                    res.LoadHeaders(headers);
                     
                     res.BodyBytes = bytes;
                 }

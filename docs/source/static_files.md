@@ -28,6 +28,19 @@ server.RouteStaticDir("/staticfiles", "./static");
 server.Run();
 ```
 
+## File Compression
+
+With a directory structure such as the following:
+
+```text
+static
++---foo.txt
++---foo.txt.br
++---foo.txt.gz
+```
+
+`Asypi.RouteStaticFile()` and `Asypi.RouteStaticDir()` will first try to satisfy requests to `foo.txt` with `foo.txt.br`, followed by `foo.txt.gz`. Asypi automatically checks the `Accept-Encoding` header and automatically sets the `Content-Encoding` header to ensure compatibility.
+
 ## Using `FileServer`
 
 FileServer allows quick, easy, and cached access to files on disk. `Server.RouteStaticFile()` and `Server.RouteStaticDir()` both utilize `FileServer` under the hood.

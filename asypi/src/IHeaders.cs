@@ -25,6 +25,12 @@ namespace Asypi {
         }
     }
     
+    public class DefaultHeadersMut : DefaultHeaders {
+        public void Set(string key, string value) {
+            Values[key] = value;
+        }
+    }
+    
     /// <summary>The <see cref="IHeaders" /> instance used by the <see cref="Server" /> for special responders (e.g. <see cref="Server.RouteStaticFile(string, string, string)" />) by default.</summary>
     public static class DefaultServerHeaders {
         /// <summary>The internal instance of <see cref="DefaultServerHeaders"/>.</summary>

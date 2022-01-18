@@ -77,6 +77,13 @@ namespace Asypi {
         /// <returns>A <see cref="CookieCollection"/> that contains cookies that accompany the request. This property returns an empty collection if the request does not contain cookies.</returns>
         public CookieCollection Cookies { get { return inner.Cookies; } }
         
+        /// <summary>Gets the collection of header name/value pairs sent with the request.</summary>
+        /// <returns>A <see cref="WebHeaderCollection "/> that contains the HTTP headers included in the request.</returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public NameValueCollection Headers {
+            get { return inner.Headers; }
+        }
+        
         /// <summary>Gets a <see cref="bool"/> value that indicates whether the request has associated body data.</summary>
         /// <returns><c>true</c> if the request has associated body data; otherwise, <c>false</c>.</returns>
         public bool HasEntityBody { get { return inner.HasEntityBody; } }

@@ -35,6 +35,9 @@ namespace AsypiTests {
             TestRunner.RunTest("Route Static Dir Depth Include", StaticFileRoutingTests.RouteStaticDirDepthInclude);
             TestRunner.RunTest("Route Static Dir Depth Exclude", StaticFileRoutingTests.RouteStaticDirDepthExclude);
             
+            TestRunner.RunTest("Static File Compression Negative 1", StaticFileCompressionTests.StaticFileCompressionNegative1);
+            TestRunner.RunTest("Static File Compression Negative 2", StaticFileCompressionTests.StaticFileCompressionNegative2);
+            
             TestRunner.RunTest("FileServer Get File", FileServerTests.GetFile);
             TestRunner.RunTest("FileServer Get File Cached", FileServerTests.GetFileCached);
             
