@@ -8,9 +8,9 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
     <projectUrl>https://github.com/therealstork/asypi</projectUrl>
-    <description>A simple, asynchronous, and scalable HTTP server.</description>
+    <description>A simple, asynchronous, and scalable web framework.</description>
     <copyright>Copyright ©2021 Asypi Contributors</copyright>
-    <tags>http server http-server web</tags>
+    <tags>web framework server web-framework web-server http</tags>
     
     <dependencies>
       <group targetFramework="net5.0">

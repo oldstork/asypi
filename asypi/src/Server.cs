@@ -35,7 +35,7 @@ namespace Asypi {
         public static bool ServerExists = false;
     }
     
-    /// <summary>Provides a simple, configurable, and scalable HTTP server.</summary>
+    /// <summary>Provides a simple, asynchronous, and flexible web server.</summary>
     public class Server {
         /// <summary>
         /// The port that the <see cref="Server"/> will bind to when

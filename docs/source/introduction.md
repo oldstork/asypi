@@ -1,6 +1,6 @@
 # Introduction
 
-A simple, asynchronous, and scalable HTTP server built on `System.Net.HttpListener`. Pronounced "AS-eh-PIE."
+A simple, asynchronous, and flexible web framework built on `System.Net.HttpListener`. Pronounced "AS-eh-PIE."
 
 ## Hello World Example
 

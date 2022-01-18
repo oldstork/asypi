@@ -2,7 +2,7 @@
 
 [![Documentation Status](https://readthedocs.org/projects/asypi/badge/?version=latest)](https://asypi.readthedocs.io/en/stable/?badge=stable)
 
-A simple, asynchronous, and scalable HTTP server built on `System.Net.HttpListener`. Pronounced "AS-eh-PIE."
+A simple, asynchronous, and flexible web framework built on `System.Net.HttpListener`. Pronounced "AS-eh-PIE."
 
 [Docs](https://asypi.readthedocs.io/en/stable/introduction.html)
 
@@ -37,16 +37,9 @@ server.Run();
 - Flexible router supporting variable parameters
 - Cached static file server supporting custom mount points
 
-## Use Cases
+## Warnings
 
-### Asypi is
-
-- Simple, asynchronous, and scalable
-- Good for proof-of-concept projects
-- Good for simple websites
-- Good for simple REST APIs
-
-### Asypi is **not**
+Asypi is not:
 
 - **Stable.** Do not use Asypi if you need stability.
 - **Well-Tested.** Do not use Asypi for mission-critical or security-critical applications.
