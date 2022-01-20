@@ -25,16 +25,36 @@ namespace Asypi {
         }
     }
     
+    /// <summary>
+    /// <see cref="DefaultHeaders" /> with a 
+    /// <c>Set()</c> method to easily add additional headers.
+    /// </summary>
     public class DefaultHeadersMut : DefaultHeaders {
+        public DefaultHeadersMut() : base() {}
+        
         public void Set(string key, string value) {
             Values[key] = value;
         }
     }
     
-    /// <summary>The <see cref="IHeaders" /> instance used by the <see cref="Server" /> for special responders (e.g. <see cref="Server.RouteStaticFile(string, string, string)" />) by default.</summary>
+    /// <summary><see cref="DefaultHeadersMut" />, with a cache control header.</summary>
+    public class DefaultStaticFileHeaders : DefaultHeadersMut {
+        public DefaultStaticFileHeaders() : base() {
+            Values["Cache-Control"] = "public, max-age=86400";
+        }
+    }
+    
+    /// <summary>
+    /// The <see cref="IHeaders" /> instances used by the 
+    /// <see cref="Server" /> for special responders 
+    /// (e.g. <see cref="Server.RouteStaticFile(string, string, string)" />) by default.
+    /// </summary>
     public static class DefaultServerHeaders {
         /// <summary>The internal instance of <see cref="DefaultServerHeaders"/>.</summary>
-        public static IHeaders Instance = new DefaultHeaders();
+        public static DefaultHeaders DefaultHeadersInstance = new DefaultHeaders();
+        
+        /// <summary>The internal instance of <see cref="DefaultStaticFileHeaders"/>.</summary>
+        public static DefaultStaticFileHeaders DefaultStaticFileHeadersInstance = new DefaultStaticFileHeaders();
         
         // C# does not allow top-level static variable definitions, so this class is necessary.
     }

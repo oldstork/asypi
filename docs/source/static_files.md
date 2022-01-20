@@ -28,6 +28,14 @@ server.RouteStaticDir("/staticfiles", "./static");
 server.Run();
 ```
 
+## Cache-Control
+
+When using `Asypi.RouteStaticFile()` or `Asypi.RouteStaticDir()`, the `Cache-Control` header is automatically set to the following:
+
+```text
+Cache-Control: public, max-age=86400
+```
+
 ## File Compression
 
 With a directory structure such as the following:

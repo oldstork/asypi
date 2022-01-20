@@ -307,31 +307,31 @@ namespace Asypi {
                             // respond with br, if possible
                             bytes = FileServer.Get(filePath + ".br");
                             
-                            DefaultHeadersMut newHeaders = new DefaultHeadersMut();
+                            DefaultStaticFileHeaders newHeaders = new DefaultStaticFileHeaders();
                             newHeaders.Set("Content-Encoding", "br");
                             headers = newHeaders;
                         } else if (gzAccepted && File.Exists(filePath + ".gz")) {
                             // then try gz
                             bytes = FileServer.Get(filePath + ".gz");
                             
-                            DefaultHeadersMut newHeaders = new DefaultHeadersMut();
+                            DefaultStaticFileHeaders newHeaders = new DefaultStaticFileHeaders();
                             newHeaders.Set("Content-Encoding", "gzip");
                             headers = newHeaders;
                         } else {
                             // if none, then just respond with file
-                            headers = DefaultServerHeaders.Instance;
+                            headers = DefaultServerHeaders.DefaultStaticFileHeadersInstance;
                             
                             bytes = FileServer.Get(filePath);
                         }
                     } else {
                         // if no accept-encoding header
-                        headers = DefaultServerHeaders.Instance;
+                        headers = DefaultServerHeaders.DefaultStaticFileHeadersInstance;
                         
                         bytes = FileServer.Get(filePath);
                     }
                 } else {
                     // if not compressing
-                    headers = DefaultServerHeaders.Instance;
+                    headers = DefaultServerHeaders.DefaultStaticFileHeadersInstance;
                     
                     bytes = FileServer.Get(filePath);
                 }

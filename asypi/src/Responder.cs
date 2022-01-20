@@ -40,7 +40,7 @@ namespace Asypi {
             
             IHeaders ehd = headers;
             
-            if (headers == null) ehd = DefaultServerHeaders.Instance;
+            if (headers == null) ehd = DefaultServerHeaders.DefaultHeadersInstance;
             
             res.LoadHeaders(ehd);
             
