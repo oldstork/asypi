@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<package >
+<package>
   <metadata>
     <id>Asypi</id>
-    <version>0.0.8</version>
+    <version>0.1.0</version>
     <title>Asypi</title>
     <authors>Asypi Contributors</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
     <projectUrl>https://github.com/therealstork/asypi</projectUrl>
-    <description>A simple, asynchronous, and scalable web framework.</description>
+    <description>A simple, asynchronous, and flexible web framework.</description>
     <copyright>Copyright ©2021 Asypi Contributors</copyright>
     <tags>web framework server web-framework web-server http</tags>
     
     <dependencies>
       <group targetFramework="net5.0">
         <dependency id="Serilog" version="2.10.0" />
-        <dependency id="Serilog.Sinks.Console" version="4.0.0" />
+        <dependency id="Serilog.Sinks.Console" version="4.0.1" />
       </group>
     </dependencies>
   </metadata>
