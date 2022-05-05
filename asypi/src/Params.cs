@@ -4,7 +4,7 @@ namespace Asypi {
     /// <summary>A utility class for global parameters.</summary>
     static class Params {
         /// <summary>The current version string.</summary>
-        public const string ASYPI_VERSION = "0.1.0";
+        public const string ASYPI_VERSION = "0.1.1";
         
         /// <summary>The number of bytes in a MiB.</summary>
         public const int BYTES_PER_MIB = 1024 * 1024;

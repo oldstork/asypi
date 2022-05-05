@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Asypi</id>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <title>Asypi</title>
     <authors>Asypi Contributors</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -13,15 +13,15 @@
     <tags>web framework server web-framework web-server http</tags>
     
     <dependencies>
-      <group targetFramework="net5.0">
-        <dependency id="Serilog" version="2.10.0" />
+      <group targetFramework="net6.0">
+        <dependency id="Serilog" version="2.11.0" />
         <dependency id="Serilog.Sinks.Console" version="4.0.1" />
       </group>
     </dependencies>
   </metadata>
   
   <files>
-    <file src="bin\Release\net5.0\asypi.dll" target="lib\net5.0" />
-    <file src="bin\Release\net5.0\asypi.xml" target="lib\net5.0" />
+    <file src="bin\Release\net6.0\asypi.dll" target="lib\net6.0" />
+    <file src="bin\Release\net6.0\asypi.xml" target="lib\net6.0" />
   </files>
 </package>
